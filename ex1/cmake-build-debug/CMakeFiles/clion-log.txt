@@ -1,1 +1,4 @@
-WSL not found at: C:\Users\Weisl\AppData\Local\Microsoft\WindowsApps\ubuntu.exe Configure Disable profile
+/usr/local/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /cs/usr/oriane.louzoun/Desktop/OperatingSystems/ex1
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /cs/usr/oriane.louzoun/Desktop/OperatingSystems/ex1/cmake-build-debug
