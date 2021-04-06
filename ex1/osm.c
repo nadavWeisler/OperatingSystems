@@ -1,3 +1,7 @@
+//
+// Created by Weisl on 4/6/2021.
+//
+
 #ifndef _OSM_H
 #define _OSM_H
 
@@ -14,7 +18,12 @@
    returns time in nano-seconds upon success,
    and -1 upon failure.
    */
-double osm_operation_time(unsigned int iterations);
+
+double osm_operation_time(unsigned int iterations) {
+    struct timeval current_time;
+    gettimeofday(&current_time, NULL);
+
+}
 
 
 /* Time measurement function for an empty function call.
