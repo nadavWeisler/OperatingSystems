@@ -14,8 +14,12 @@ about this submission.
 ANSWERS:
 
 Q1:
-Here are answers to theoreical questions
-if there were such questions in the exercise.
+the program expects a single argument, if none was given it will quit.
+if an argument was given, the program will open a folder called wellcome, inside it a floder called to, and inside it a file called OS2021 and in it the conetent:
+orine.louzoun (my username)
+if you havnt read the course guidelines yet -- do it right now!
+
+and then it deletes the file and the floders.
 
 Q2:
 Here are answers to theoreical questions
