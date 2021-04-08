@@ -1,0 +1,22 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/cs/usr/oriane.louzoun/Desktop/OperatingSystems/ex1/osm.cpp
+iostream
+-
+osm.h
+/cs/usr/oriane.louzoun/Desktop/OperatingSystems/ex1/osm.h
+sys/time.h
+-
+
+/cs/usr/oriane.louzoun/Desktop/OperatingSystems/ex1/osm.h
+sys/time.h
+-
+stdio.h
+-
+

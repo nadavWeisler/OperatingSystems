@@ -1,0 +1,3 @@
+/cs/usr/oriane.louzoun/Desktop/OperatingSystems/ex1/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/cs/usr/oriane.louzoun/Desktop/OperatingSystems/ex1/cmake-build-debug/CMakeFiles/edit_cache.dir
+/cs/usr/oriane.louzoun/Desktop/OperatingSystems/ex1/cmake-build-debug/CMakeFiles/ex1.dir

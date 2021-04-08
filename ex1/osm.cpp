@@ -2,12 +2,9 @@
 // Created by weisler on 06/04/2021.
 //
 
-#include "osm.h"
-#include <ctime>
-#include <cstdio>
 #include <iostream>
-
-const int SUB_ITERATIONS = 11;
+#include "osm.h"
+#include <sys/time.h>
 
 /**
  * An empty function
@@ -36,7 +33,7 @@ double osm_operation_time(unsigned int iterations) {
     timeval start_time;
     int a = 0, b = 1;
     gettimeofday(&start_time, NULL);
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i < (int) iterations; i++) {
         a += b;
         a += b;
         a += b;
@@ -51,7 +48,7 @@ double osm_operation_time(unsigned int iterations) {
     }
     timeval end_time;
     gettimeofday(&end_time, NULL);
-    return (double) (get_nano(end_time)) - get_nano(start_time) / (iterations * SUB_ITERATIONS);
+    return (double) ((get_nano(end_time)) - get_nano(start_time)) / (iterations * 11);
 
 }
 
@@ -66,7 +63,7 @@ double osm_function_time(unsigned int iterations) {
     }
     timeval start_time;
     gettimeofday(&start_time, NULL);
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i < (int) iterations; i++) {
         empty_func();
         empty_func();
         empty_func();
@@ -81,7 +78,7 @@ double osm_function_time(unsigned int iterations) {
     }
     timeval end_time;
     gettimeofday(&end_time, NULL);
-    return (double) (get_nano(end_time)) - get_nano(start_time) / (iterations * SUB_ITERATIONS);
+    return (double) ((get_nano(end_time)) - get_nano(start_time)) / (iterations * 11);
 }
 
 
@@ -95,7 +92,7 @@ double osm_syscall_time(unsigned int iterations) {
     }
     timeval start_time;
     gettimeofday(&start_time, NULL);
-    for (int i = 0; i < iterations; i++) {
+    for (int i = 0; i < (int) iterations; i++) {
         OSM_NULLSYSCALL;
         OSM_NULLSYSCALL;
         OSM_NULLSYSCALL;
@@ -110,7 +107,7 @@ double osm_syscall_time(unsigned int iterations) {
     }
     timeval end_time;
     gettimeofday(&end_time, NULL);
-    return (double) (get_nano(end_time)) - get_nano(start_time) / (iterations * SUB_ITERATIONS);
+    return (double) ((get_nano(end_time)) - get_nano(start_time)) / (iterations * 11);
 }
 
 
