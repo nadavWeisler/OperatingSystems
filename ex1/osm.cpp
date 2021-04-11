@@ -32,7 +32,7 @@ double osm_operation_time(unsigned int iterations) {
     }
     timeval start_time;
     int a = 0, b = 1;
-    gettimeofday(&start_time, NULL);
+    gettimeofday(&start_time, nullptr);
     for (int i = 0; i < (int) iterations; i++) {
         a += b;
         a += b;
@@ -47,7 +47,7 @@ double osm_operation_time(unsigned int iterations) {
         a += b;
     }
     timeval end_time;
-    gettimeofday(&end_time, NULL);
+    gettimeofday(&end_time, nullptr);
     return (double) ((get_nano(end_time)) - get_nano(start_time)) / (iterations * 11);
 
 }
@@ -62,7 +62,7 @@ double osm_function_time(unsigned int iterations) {
         return 0;
     }
     timeval start_time;
-    gettimeofday(&start_time, NULL);
+    gettimeofday(&start_time, nullptr);
     for (int i = 0; i < (int) iterations; i++) {
         empty_func();
         empty_func();
@@ -77,7 +77,7 @@ double osm_function_time(unsigned int iterations) {
         empty_func();
     }
     timeval end_time;
-    gettimeofday(&end_time, NULL);
+    gettimeofday(&end_time, nullptr);
     return (double) ((get_nano(end_time)) - get_nano(start_time)) / (iterations * 11);
 }
 
@@ -91,22 +91,22 @@ double osm_syscall_time(unsigned int iterations) {
         return 0;
     }
     timeval start_time;
-    gettimeofday(&start_time, NULL);
+    gettimeofday(&start_time, nullptr);
     for (int i = 0; i < (int) iterations; i++) {
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
-        OSM_NULLSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
+        OSM_nullptrSYSCALL;
     }
     timeval end_time;
-    gettimeofday(&end_time, NULL);
+    gettimeofday(&end_time, nullptr);
     return (double) ((get_nano(end_time)) - get_nano(start_time)) / (iterations * 11);
 }
 
