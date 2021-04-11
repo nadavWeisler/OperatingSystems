@@ -111,9 +111,9 @@ double osm_syscall_time(unsigned int iterations) {
 }
 
 
-int main() {
+/**int main() {
     int iterations = 100000;
     std::cout << "System calls time: " << osm_syscall_time(iterations)
-              << std::endl << "Functions time: " << osm_function_time(iterations)
+    << std::endl << "Functions time: " << osm_function_time(iterations)
               << std::endl << "Operations time: " << osm_operation_time(iterations) << std::endl;
-}
+}/
