@@ -15,7 +15,7 @@ TARGETS = $(OSMLIB)
 TAR=tar
 TARFLAGS=-cvf
 TARNAME=ex1.tar
-TARSRCS=$(LIBSRC) Makefile running_time_graph.PNG README
+TARSRCS=$(LIBSRC) Makefile running_time_graph.png README
 
 all: $(TARGETS)
 
