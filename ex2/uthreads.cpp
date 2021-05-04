@@ -26,6 +26,7 @@ private:
     int thread_count = 0;
     int quantum_usecs = 0;
     int stack = 0; // add a stack
+    thread* threads[MAX_THREAD_NUM];
     queue<thread> ready_threads;
     thread* running = nullptr;
 
@@ -33,9 +34,10 @@ public:
     int init_thread()
     {
         thread t = {ID, this->quantum_usecs, ready};
-        ID++;
+        this->manage_id();
         thread_count++;
         ready_threads.push(t);
+        this->threads[t.ID] = &t;
         return t.ID;
     }
 
@@ -49,16 +51,38 @@ public:
         return this->thread_count;
     }
 
-    // sets the next availabe id
-    int manage_id()
+    // sets the next id
+    void manage_id()
     {
-
+        int id;
+        for (int i = 0; i<MAX_THREAD_NUM; i++)
+        {
+            if (this->threads[i] == nullptr)
+            {
+                this->ID = i;
+                break;
+            }
+        }
     }
 
     // moves the threads from ready to running
     int manage_ready()
     {
 
+    }
+
+    int check_id(int id)
+    {
+        if (this->threads[id] == nullptr || id > MAX_THREAD_NUM || id < 0)
+        {
+            return -1;
+        }
+        return 1;
+    }
+
+    int free_thread(int id)
+    {
+        this->threads[id] = nullptr;
     }
 };
 
@@ -82,11 +106,18 @@ int uthread_spawn(void (*f)(void))
         return -1;
     }
     t.init_thread(); // adds a new thread
-
+    t.manage_ready();
+    return 0;
 }
 
 int uthread_terminate(int tid)
 {
+    if (t.check_id(tid) == -1)
+    {
+        return -1;
+    }
+    t.free_thread(tid);
+    return 0;
 
 }
 
