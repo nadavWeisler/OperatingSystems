@@ -115,9 +115,9 @@ public:
         return this->ID;
     }
 
-    int set_to_block()
+    int set_to_block(int tid)
     {
-
+        this->threads[tid]->state = blocked;
     }
 };
 
@@ -173,6 +173,7 @@ int uthread_block(int tid)
     {
         return -1 // add error message
     }
+    t.set_to_block(tid)
 
 }
 
@@ -182,8 +183,6 @@ int uthread_resume(int tid)
     {
         return -1 // add error message
     }
-    if ()
-
 
 }
 
@@ -203,10 +202,9 @@ int uthread_mutex_lock()
             return -1;
         }
         t.get_mutex().list_of_blocked[t.get_mutex().num_of_blocked] = t.get_running_id();
-        t.set_to_block();
+        t.set_to_block(t.get_running_id());
     }
 }
-
 
 
 int uthread_mutex_unlock()
@@ -231,8 +229,6 @@ int uthread_get_total_quantums()
     return t.get_quantum_usecs()
 
 }
-
-
 
 int uthread_get_quantums(int tid)
 {
