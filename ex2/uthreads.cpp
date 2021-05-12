@@ -10,14 +10,26 @@ typdef enum State{
     ready, blocked, running
 }State ;
 
+typedef enum MutexState
+{
+    locked, free
+};
 struct thread
 {
     int ID;
     int quantum;
     State state;
     char stack[STACK_SIZE];
+    sigjmp_buf env;
 }typedef thread ;
 
+struct mutex
+{
+    int state;
+    int id_of_running;
+    int list_of_blocked;
+    int num_of_blocked;
+}typedef mutex ;
 
 class ThreadManager
 {
@@ -28,7 +40,7 @@ private:
     int stack = 0; // add a stack
     thread* threads[MAX_THREAD_NUM];
     queue<thread> ready_threads;
-    int id_running;
+    mutex m = {free, 0, nullptr};
 
 public:
     int init_thread()
@@ -94,6 +106,21 @@ public:
     {
         return this->threads[tid]->quantum;
     }
+
+    mutex& get_mutex()
+    {
+        return this->m;
+    }
+
+    int get_running_id()
+    {
+        return this->ID;
+    }
+
+    int set_to_block()
+    {
+
+    }
 };
 
 ThreadManager t;
@@ -154,23 +181,39 @@ int uthread_resume(int tid)
 
 int uthread_mutex_lock()
 {
-
-// להוסיף אוביקט mutex?
-
+    if (t.get_mutex().state == free)
+    {
+        t.get_mutex().state == free;
+        t.get_mutex().id_of_running = t.get_running_id();
+        return 0;
+    }
+    if (t.get_mutex().state == locked)
+    {
+        if (t.get_mutex().id_of_running == t.get_running_id()) {
+            // error message
+            return -1;
+        }
+        t.get_mutex().list_of_blocked[t.get_mutex().num_of_blocked] = t.get_running_id();
+        t.set_to_block();
+    }
 }
 
 
 
 int uthread_mutex_unlock()
 {
-
+    if (t.get_mutex().state == free)
+    {
+        // error message
+        return -1;
+    }
+    
 }
 
 
 int uthread_get_tid()
 {
-    // הטרד הקורא? הראשי?
-
+    return t.get_running_id()
 }
 
 
