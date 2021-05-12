@@ -6,9 +6,9 @@ using namespace std;
 #include <queue>
 #include "uthreads.h"
 
-enum State{
-    ready, blocked, run
-};
+typdef enum State{
+    ready, blocked, running
+}State ;
 
 struct thread
 {
@@ -28,7 +28,7 @@ private:
     int stack = 0; // add a stack
     thread* threads[MAX_THREAD_NUM];
     queue<thread> ready_threads;
-    thread* running = nullptr;
+    int id_running;
 
 public:
     int init_thread()
@@ -84,6 +84,16 @@ public:
     {
         this->threads[id] = nullptr;
     }
+
+    int get_quantum_usecs()
+    {
+        return this->quantum_usecs;
+    }
+
+    int get_thread_quantum(int tid)
+    {
+        return this->threads[tid]->quantum;
+    }
 };
 
 ThreadManager t;
@@ -123,17 +133,29 @@ int uthread_terminate(int tid)
 
 int uthread_block(int tid)
 {
+    if (t.manage_id(tid) == -1)
+    {
+        return -1 // add error message
+    }
 
 }
 
 int uthread_resume(int tid)
 {
+    if (t.manage_id(tid) == -1)
+    {
+        return -1 // add error message
+    }
+    if ()
+
 
 }
 
 
 int uthread_mutex_lock()
 {
+
+// להוסיף אוביקט mutex?
 
 }
 
@@ -147,12 +169,14 @@ int uthread_mutex_unlock()
 
 int uthread_get_tid()
 {
+    // הטרד הקורא? הראשי?
 
 }
 
 
 int uthread_get_total_quantums()
 {
+    return t.get_quantum_usecs()
 
 }
 
@@ -160,5 +184,10 @@ int uthread_get_total_quantums()
 
 int uthread_get_quantums(int tid)
 {
-
+    if (t.check_id(tid) == -1)
+    {
+        return -1;
+        // error message
+    }
+    return t.get_thread_quantum(tid);
 }
