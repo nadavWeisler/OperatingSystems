@@ -19,8 +19,8 @@ struct thread
     int ID;
     int quantum;
     State state;
-    char stack[STACK_SIZE];
     sigjmp_buf env;
+    char stack[STACK_SIZE];
 }typedef thread ;
 
 struct mutex
@@ -43,14 +43,13 @@ private:
     mutex m = {free, 0, nullptr};
 
 public:
-    int init_thread()
+    int init_thread(int id, void* f)
     {
-        thread t = {ID, this->quantum_usecs, ready};
-        this->manage_id();
-        thread_count++;
-        ready_threads.push(t);
-        this->threads[t.ID] = &t;
-        return t.ID;
+        thread th = {id, this->quantum_usecs, ready,f};
+        this->thread_count++;
+        ready_threads.push(th);
+        this->threads[id] = &th;
+        return id;
     }
 
     void init_first(int quantum_usec)
@@ -64,17 +63,16 @@ public:
     }
 
     // sets the next id
-    void manage_id()
+    int manage_id()
     {
-        int id;
         for (int i = 0; i<MAX_THREAD_NUM; i++)
         {
             if (this->threads[i] == nullptr)
             {
-                this->ID = i;
-                break;
+                return i;
             }
         }
+        return -1;
     }
 
     // moves the threads from ready to running
@@ -142,6 +140,17 @@ int uthread_spawn(void (*f)(void))
     {
         return -1;
     }
+    if (!f)
+    {
+        // error message
+        return -1;
+    }
+    int id = t.manage_id();
+    if (id == -1)
+    {
+        return -1;
+        // error messgae
+    }
     t.init_thread(); // adds a new thread
     t.manage_ready();
     return 0;
@@ -207,7 +216,7 @@ int uthread_mutex_unlock()
         // error message
         return -1;
     }
-    
+
 }
 
 
