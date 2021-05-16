@@ -1,9 +1,3 @@
-<<<<<<< Updated upstream
-#include <queue>
-=======
-using namespace std;
-
->>>>>>> Stashed changes
 #include "uthreads.h"
 #include <queue>
 #include <stdio.h>
@@ -89,40 +83,30 @@ private:
 	int thread_count = 0;
 	int quantum_usecs;
 	int total_quantum = 0;
-<<<<<<< Updated upstream
-	Thread *threads[MAX_THREAD_NUM];
 	queue<int> ready_threads;
 	Mutex mutex = {MutexState::free, 0, nullptr};
-=======
-	int stack = 0; // add a stack // why?
 	Thread *threads[MAX_THREAD_NUM]; //
-	queue<Thread> ready_threads; // need to changes to int or pointer
-	Mutex m = {MutexState::free, 0, nullptr};
     sigset_t mask;
->>>>>>> Stashed changes
     struct itimerval timer{}; // timer
 
 public
     //Singleton
     static * ThreadManager manager;
-<<<<<<< Updated upstream
 
     /**
      * @brief                   Singleton constructor
      * @param quantum_usecs     Thread max running time.
      */
-    ThreadManager(int quantum_usecs): threads(), ready_threads(),
-    {
-=======
     ThreadManager(int quantum_usecs): threads(), ready_threads(), mask(){
->>>>>>> Stashed changes
+        // todo need to add sigaddset, sigempty set,  SIGVTALRM,sa_hanlder
         this->quantum_usecs = quantum_usecs;
+
         for (int i  =0; i < MAX_THREAD_NUM; i++)
         {
             threads[i] = nullptr;
         }
         // init first thread
-        threads[0] = {0, quantum_usecs,running, nullptr };
+        threads[0] = {0, 1,running, nullptr};
         this->thread_count++;
     }
 
@@ -185,8 +169,22 @@ public
 	{
 		//todo: moves the threads from ready to running
 		// need to use siglongjmp
-		sigsetjmp(this->threads[this->get_running_id()])
-
+		// add sigprocmask checks
+        if (sigsetjmp(this->threads[this->running_id]->env, 1))
+        {
+            fprintf(stderr, "system error: masking failed");
+            return -1;
+        }
+        if (this->threads[this->running_id]->state == running) // if running is blocked
+        {
+            this->ready_threads.push(this->running_id);
+            this->threads[this->running_id]->state = ready;
+        }
+        this->running_id = this->ready_threads.pop_front();
+        this->threads[this->running_id]->quantum++;
+        this->total_quantum++;
+        this->threads[this->running_id]->state = running;
+        siglongjmp(this->threads[this->running_id]->env, 1)
 	}
 
 	/**
@@ -285,8 +283,30 @@ public
         }
         this->threads[tid]->state = ready;
         this->ready_threads.push_back(threads[tid])
-
     }
+
+    int time()
+    {
+	    timer.it_value.tv_sec = this->quantum_usecs / (int) 1e6;
+	    timer.it_value.tv_usec = this->quantum_usecs % (int) 1e6;
+        timer.it_interval.tv_sec = 0;
+        timer.it_interval.tv_usec = 0;
+        if (setitimer(ITIMER_VIRTUAL, &timer, nullptr)) {
+            fprintf(stderr, "system error: timer error\n");
+            clean_exit();
+            exit(1);
+        }
+    }
+
+    int clean_exit() {
+        // todo free memeory
+        for (int i = 0; i < MAX_THREAD_NUM; i++)
+        {
+            this->threads[i] = nullptr;
+        }
+        free(this);
+    }
+
 };
 
 // need to use singleton
@@ -302,12 +322,13 @@ ThreadManager manager;
 */
 int uthread_init(int quantum_usecs)
 {
-	if (quantum_usecs < 0)
+	if (quantum_usecs <= 0)
 	{
         fprintf(stderr, "thread library error: invalid input\n");
 		return -1;
 	}
 	ThreadManager::manager = new ThreadManager(quantum_usecs); // not sure if memory should be allocted
+	// need to add sigaddset, sigempty set,  SIGVTALRM,sa_hanlder
 	if (!ThreadManager::manager)
     {
         printf(stderr, "system error: memory allocation failed\n");
