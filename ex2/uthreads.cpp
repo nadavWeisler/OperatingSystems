@@ -1,5 +1,16 @@
+<<<<<<< Updated upstream
 #include <queue>
+=======
+using namespace std;
+
+>>>>>>> Stashed changes
 #include "uthreads.h"
+#include <queue>
+#include <stdio.h>
+#include <setjmp.h>
+#include <signal.h>
+#include <sys/time.h>
+#include <algorithm>
 
 #ifdef __x86_64__
 /* code for 64 bit Intel arch */
@@ -78,14 +89,23 @@ private:
 	int thread_count = 0;
 	int quantum_usecs;
 	int total_quantum = 0;
+<<<<<<< Updated upstream
 	Thread *threads[MAX_THREAD_NUM];
 	queue<int> ready_threads;
 	Mutex mutex = {MutexState::free, 0, nullptr};
+=======
+	int stack = 0; // add a stack // why?
+	Thread *threads[MAX_THREAD_NUM]; //
+	queue<Thread> ready_threads; // need to changes to int or pointer
+	Mutex m = {MutexState::free, 0, nullptr};
+    sigset_t mask;
+>>>>>>> Stashed changes
     struct itimerval timer{}; // timer
 
 public
     //Singleton
     static * ThreadManager manager;
+<<<<<<< Updated upstream
 
     /**
      * @brief                   Singleton constructor
@@ -93,6 +113,9 @@ public
      */
     ThreadManager(int quantum_usecs): threads(), ready_threads(),
     {
+=======
+    ThreadManager(int quantum_usecs): threads(), ready_threads(), mask(){
+>>>>>>> Stashed changes
         this->quantum_usecs = quantum_usecs;
         for (int i  =0; i < MAX_THREAD_NUM; i++)
         {
@@ -110,10 +133,21 @@ public
      * @return      0 if success, -1 otherwise
      */
 	int init_thread(int id, void *f) {
-        Thread newThread = {id, this->quantum_usecs, ready, f};
+        Thread newThread = {id, 0, ready, f};
+        address_t sp, pc;
+        sp = (address_t)stack1 + STACK_SIZE - sizeof(address_t);
+        pc = (address_t)f;
+        sigsetjmp(env[0], 1);
+        (newThread->env->__jmpbuf)[JB_SP] = translate_address(sp);
+        (newThread->env->__jmpbuf)[JB_PC] = translate_address(pc);
+        if (sigemptyset(&env[0]->__saved_mask))
+        {
+            // error message
+            exit(-1)
+        }
         // need to use sigsetjmp to save the env of the thread
         this->thread_count++;
-        ready_threads.push(newThread);
+        this->ready_threads.push(id);
         this->threads[id] = &newThread;
         return id;
     }
@@ -151,6 +185,8 @@ public
 	{
 		//todo: moves the threads from ready to running
 		// need to use siglongjmp
+		sigsetjmp(this->threads[this->get_running_id()])
+
 	}
 
 	/**
