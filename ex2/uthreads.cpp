@@ -46,67 +46,84 @@ address_t translate_address(address_t addr)
 
 #endif
 
-typedef State enum ThreadState
+/*
+ * Thread state enum
+ */
+typedef ThreadState enum ThreadState
 {
-	ready,
-	blocked,
-	running
+    ready,
+    blocked,
+    running
 };
 
+/*
+ * Mutex state enum
+ */
 typedef MutexState enum MutexState
 {
-	locked,
-	free
+    locked,
+    free
 };
 
+/*
+ * Thread struct representation
+ */
 struct Thread
 {
-	int ID;
-	int quantum;
-	State state;
-	sigjmp_buf env; // an array keeping al the data of the thread
-	char stack[STACK_SIZE];
+    int ID;
+    int quantum;
+    State state;
+    sigjmp_buf env; // an array keeping al the data of the thread
+    char stack[STACK_SIZE];
 } typedef thread;
 
+/*
+ * Mutex struct representation
+ */
 struct Mutex
 {
-	int state;
-	int running_thread_id;
-	int *blocked_list;
-	int num_of_blocked;
+    int state;
+    int running_thread_id;
+    int *blocked_list;
+    int num_of_blocked;
 } typedef Mutex;
 
+/*
+ * Thread manager class
+ */
 class ThreadManager
 {
 private:
-	int running_id = 0;
-	int thread_count = 0;
-	int quantum_usecs;
-	int total_quantum = 0;
-	queue<int> ready_threads;
-	Mutex mutex = {MutexState::free, 0, nullptr};
-	Thread *threads[MAX_THREAD_NUM]; //
+    int running_id = 0;
+    int thread_count = 0;
+    int quantum_usecs;
+    int total_quantum = 0;
+    queue<int> ready_threads;
+    Mutex mutex = {MutexState::free, 0, nullptr};
+    Thread *threads[MAX_THREAD_NUM]; //
     sigset_t mask;
     struct itimerval timer{}; // timer
 
 public
     //Singleton
-    static * ThreadManager manager;
+    static *
+    ThreadManager manager;
 
     /**
      * @brief                   Singleton constructor
      * @param quantum_usecs     Thread max running time.
      */
-    ThreadManager(int quantum_usecs): threads(), ready_threads(), mask(){
+    ThreadManager(int quantum_usecs) : threads(), ready_threads(), mask()
+    {
         // todo need to add sigaddset, sigempty set,  SIGVTALRM,sa_hanlder
         this->quantum_usecs = quantum_usecs;
 
-        for (int i  =0; i < MAX_THREAD_NUM; i++)
+        for (int i = 0; i < MAX_THREAD_NUM; i++)
         {
             threads[i] = nullptr;
         }
         // init first thread
-        threads[0] = {0, 1,running, nullptr};
+        threads[0] = {0, 1, running, nullptr};
         this->thread_count++;
     }
 
@@ -116,11 +133,12 @@ public
      * @param f     Address
      * @return      0 if success, -1 otherwise
      */
-	int init_thread(int id, void *f) {
+    int init_thread(int id, void *f)
+    {
         Thread newThread = {id, 0, ready, f};
         address_t sp, pc;
-        sp = (address_t)stack1 + STACK_SIZE - sizeof(address_t);
-        pc = (address_t)f;
+        sp = (address_t) stack1 + STACK_SIZE - sizeof(address_t);
+        pc = (address_t) f;
         sigsetjmp(env[0], 1);
         (newThread->env->__jmpbuf)[JB_SP] = translate_address(sp);
         (newThread->env->__jmpbuf)[JB_PC] = translate_address(pc);
@@ -140,36 +158,36 @@ public
      * @brief   Get thread count
      * @return  Threads count
      */
-	int get_thread_count()
-	{
-		return this->thread_count;
-	}
+    int get_thread_count()
+    {
+        return this->thread_count;
+    }
 
-	/**
-	 * @brief   Get new thread ID
-	 * @return  New thread ID
-	 */
-	int get_new_id()
-	{
-		for (int i = 0; i < MAX_THREAD_NUM; i++)
-		{
-			if (this->threads[i] == nullptr)
-			{
-				return i;
-			}
-		}
-		return -1;
-	}
+    /**
+     * @brief   Get new thread ID
+     * @return  New thread ID
+     */
+    int get_new_id()
+    {
+        for (int i = 0; i < MAX_THREAD_NUM; i++)
+        {
+            if (this->threads[i] == nullptr)
+            {
+                return i;
+            }
+        }
+        return -1;
+    }
 
-	/**
-	 * @brief   Threads scheduler
-	 * @return  0 if success, -1 otherwise
-	 */
-	int manage_ready()
-	{
-		//todo: moves the threads from ready to running
-		// need to use siglongjmp
-		// add sigprocmask checks
+    /**
+     * @brief   Threads scheduler
+     * @return  0 if success, -1 otherwise
+     */
+    int manage_ready()
+    {
+        //todo: moves the threads from ready to running
+        // need to use siglongjmp
+        // add sigprocmask checks
         if (sigsetjmp(this->threads[this->running_id]->env, 1))
         {
             fprintf(stderr, "system error: masking failed");
@@ -185,74 +203,74 @@ public
         this->total_quantum++;
         this->threads[this->running_id]->state = running;
         siglongjmp(this->threads[this->running_id]->env, 1)
-	}
+    }
 
-	/**
-	 * @brief       Validate thread ID
-	 * @param id    ID
-	 * @return      0 if success, -1 otherwise
-	 */
-	bool valid_id(int id)
-	{
-		return this->threads[id] != nullptr && id <= MAX_THREAD_NUM && id >= 0;
-	}
+    /**
+     * @brief       Validate thread ID
+     * @param id    ID
+     * @return      0 if success, -1 otherwise
+     */
+    bool valid_id(int id)
+    {
+        return this->threads[id] != nullptr && id <= MAX_THREAD_NUM && id >= 0;
+    }
 
-	/**
-	 * @brief       Free thread by thread ID
-	 * @param id    Thread ID
-	 * @return      0 if success, -1 otherwise
-	 */
-	int free_thread(int id)
-	{
+    /**
+     * @brief       Free thread by thread ID
+     * @param id    Thread ID
+     * @return      0 if success, -1 otherwise
+     */
+    int free_thread(int id)
+    {
         free(this->threads[id])
-		this->threads[id] = nullptr;
+        this->threads[id] = nullptr;
         this->thread_count--;
-	}
+    }
 
-	/**
-	 * @brief   Get all threads quantum
-	 * @return  All threads quantum
-	 */
-	int get_quantum_usecs()
-	{
-		return this->total_quantum;
-	}
+    /**
+     * @brief   Get all threads quantum
+     * @return  All threads quantum
+     */
+    int get_quantum_usecs()
+    {
+        return this->total_quantum;
+    }
 
-	/**
-	 * @brief       Get thread quantum by thread ID
-	 * @param tid   Thread ID
-	 * @return      Thread quantum
-	 */
-	int get_thread_quantum(int tid)
-	{
-		return this->threads[tid]->quantum;
-	}
+    /**
+     * @brief       Get thread quantum by thread ID
+     * @param tid   Thread ID
+     * @return      Thread quantum
+     */
+    int get_thread_quantum(int tid)
+    {
+        return this->threads[tid]->quantum;
+    }
 
-	/**
-	 * @brief   Get mutex reference
-	 * @return  Mutex
-	 */
-	Mutex &get_mutex()
-	{
-		return this->m;
-	}
+    /**
+     * @brief   Get mutex reference
+     * @return  Mutex
+     */
+    Mutex &get_mutex()
+    {
+        return this->m;
+    }
 
-	/**
-	 * @brief   Get running thread ID
-	 * @return  Running thread ID
-	 */
-	int get_running_id()
-	{
-		return this->running_id;
-	}
+    /**
+     * @brief   Get running thread ID
+     * @return  Running thread ID
+     */
+    int get_running_id()
+    {
+        return this->running_id;
+    }
 
-	/**
-	 * @brief       Block thread
-	 * @param tid   Thread ID
-	 * @return      0 if success, -1 otherwise
-	 */
-	int set_to_block(int tid)
-	{
+    /**
+     * @brief       Block thread
+     * @param tid   Thread ID
+     * @return      0 if success, -1 otherwise
+     */
+    int set_to_block(int tid)
+    {
         if (tid == 0)
         {
             fprintf(stderr, "thread library error: attempting to block the main thread\n");
@@ -262,20 +280,20 @@ public
         {
             return 0;
         }
-		this->threads[tid]->state = blocked;
+        this->threads[tid]->state = blocked;
         // need to remove from ready q
         if (this->running_id == tid) // blocked thred is currenlty running
         {
             this->manage_ready();
         }
-	}
+    }
 
-	/**
-	 * @brief       Resume thread
-	 * @param tid   Thread ID
-	 * @return      0 if success, -1 otherwise
-	 */
-	int resume_thread(int tid)
+    /**
+     * @brief       Resume thread
+     * @param tid   Thread ID
+     * @return      0 if success, -1 otherwise
+     */
+    int resume_thread(int tid)
     {
         if (this->threads[tid] != blocked) // thread dosnt need to be freed
         {
@@ -287,18 +305,20 @@ public
 
     int time()
     {
-	    timer.it_value.tv_sec = this->quantum_usecs / (int) 1e6;
-	    timer.it_value.tv_usec = this->quantum_usecs % (int) 1e6;
+        timer.it_value.tv_sec = this->quantum_usecs / (int) 1e6;
+        timer.it_value.tv_usec = this->quantum_usecs % (int) 1e6;
         timer.it_interval.tv_sec = 0;
         timer.it_interval.tv_usec = 0;
-        if (setitimer(ITIMER_VIRTUAL, &timer, nullptr)) {
+        if (setitimer(ITIMER_VIRTUAL, &timer, nullptr))
+        {
             fprintf(stderr, "system error: timer error\n");
             clean_exit();
             exit(1);
         }
     }
 
-    int clean_exit() {
+    int clean_exit()
+    {
         // todo free memeory
         for (int i = 0; i < MAX_THREAD_NUM; i++)
         {
@@ -322,19 +342,20 @@ ThreadManager manager;
 */
 int uthread_init(int quantum_usecs)
 {
-	if (quantum_usecs <= 0)
-	{
+    if (quantum_usecs <= 0)
+    {
         fprintf(stderr, "thread library error: invalid input\n");
-		return -1;
-	}
-	ThreadManager::manager = new ThreadManager(quantum_usecs); // not sure if memory should be allocted
-	// need to add sigaddset, sigempty set,  SIGVTALRM,sa_hanlder
-	if (!ThreadManager::manager)
+        return -1;
+    }
+    ThreadManager::manager = new ThreadManager(
+            quantum_usecs); // not sure if memory should be allocted
+    // need to add sigaddset, sigempty set,  SIGVTALRM,sa_hanlder
+    if (!ThreadManager::manager)
     {
         printf(stderr, "system error: memory allocation failed\n");
         exit(1);
     }
-	return 0;
+    return 0;
 }
 
 /*
@@ -349,25 +370,25 @@ int uthread_init(int quantum_usecs)
 */
 int uthread_spawn(void (*f)(void))
 {
-	if (manager.get_thread_count() == MAX_THREAD_NUM)
-	{
+    if (manager.get_thread_count() == MAX_THREAD_NUM)
+    {
         fprintf(stderr, "thread library error: reached maximum number of threads\n");
-		return -1;
-	}
-	if (!f)
-	{
-		fprintf(stderr, "thread library error: invalid input\n");
-		return -1;
-	}
-	int id = manager.get_new_id();
-	if (id == -1)
-	{
+        return -1;
+    }
+    if (!f)
+    {
+        fprintf(stderr, "thread library error: invalid input\n");
+        return -1;
+    }
+    int id = manager.get_new_id();
+    if (id == -1)
+    {
         "thread library error: reached maximum number of threads\n"); // checked by max number?
-		return -1;
-	}
-	ThreadManager::manager.init_thread(id, f);
-	ThreadManager::manager.manage_ready();
-	return 0;
+        return -1;
+    }
+    ThreadManager::manager.init_thread(id, f);
+    ThreadManager::manager.manage_ready();
+    return 0;
 }
 
 /*
@@ -383,14 +404,14 @@ int uthread_spawn(void (*f)(void))
 */
 int uthread_terminate(int tid)
 {
-	if (ThreadManager:: manager.valid_id(tid))
-	{
-		ThreadManager:: manager.free_thread(tid);
-		return 0;
-	}
+    if (ThreadManager::manager.valid_id(tid))
+    {
+        ThreadManager::manager.free_thread(tid);
+        return 0;
+    }
     fprintf(stderr, "thread library error: invalid input\n");
-	return -1;
-	//todo: release thread ID
+    return -1;
+    //todo: release thread ID
 }
 
 /*
@@ -404,12 +425,12 @@ int uthread_terminate(int tid)
 */
 int uthread_block(int tid)
 {
-	if (manager.get_new_id() == -1)
-	{
+    if (manager.get_new_id() == -1)
+    {
         fprintf(stderr, "thread library error: invalid input\n");
-		return -1;
-	}
-	ThreadManager:: manager.set_to_block(tid);
+        return -1;
+    }
+    ThreadManager::manager.set_to_block(tid);
 }
 
 /*
@@ -421,83 +442,101 @@ int uthread_block(int tid)
 */
 int uthread_resume(int tid)
 {
-	if (manager.get_new_id() == -1)
-	{
+    if (manager.get_new_id() == -1)
+    {
         fprintf(stderr, "thread library error: invalid input\n");
-		return -1;
-	}
-	ThreadManager::manager.resume_thread();
+        return -1;
+    }
+    ThreadManager::manager.resume_thread();
 }
 
-/**
- * @brief   Lock mutex
- * @return  0 if success -1 otherwise
- */
+/*
+ * Description: This function tries to acquire a mutex.
+ * If the mutex is unlocked, it locks it and returns.
+ * If the mutex is already locked by different thread, the thread moves to BLOCK state.
+ * In the future when this thread will be back to RUNNING state,
+ * it will try again to acquire the mutex.
+ * If the mutex is already locked by this thread, it is considered an error.
+ * Return value: On success, return 0. On failure, return -1.
+*/
 int uthread_mutex_lock()
 {
-	if (ThreadManager::manager.get_mutex().state == MutexState::free)
-	{
-		ThreadManager::manager.get_mutex().state == MutexState::free;
-		ThreadManager::manager.get_mutex().running_thread_id = manager.get_running_id();
-		return 0;
-	}
-	else if (ThreadManager::manager.get_mutex().state == MutexState::locked)
-	{
-		if (ThreadManager::manager.get_mutex().running_thread_id == ThreadManager:: manager.get_running_id())
-		{
-			fprintf(stderr, "thread library error: mutex error\n);
-			return -1;
-		}
-		int block_number = manager.get_mutex().num_of_blocked;
-		ThreadManager:: manager.get_mutex().blocked_list[block_number] = ThreadManager:: manager.get_running_id();
-		ThreadManager:: manager.set_to_block(ThreadManager::manager.get_running_id());
-	}
+    if (ThreadManager::manager.get_mutex().state == MutexState::free)
+    {
+        ThreadManager::manager.get_mutex().state == MutexState::free;
+        ThreadManager::manager.get_mutex().running_thread_id = manager.get_running_id();
+        return 0;
+    }
+    else if (ThreadManager::manager.get_mutex().state == MutexState::locked)
+    {
+        if (ThreadManager::manager.get_mutex().running_thread_id ==
+            ThreadManager::manager.get_running_id())
+        {
+            fprintf(stderr, "thread library error: mutex error\n);
+            return -1;
+        }
+        int block_number = manager.get_mutex().num_of_blocked;
+        ThreadManager::manager.get_mutex().blocked_list[block_number] = ThreadManager::manager.get_running_id();
+        ThreadManager::manager.set_to_block(ThreadManager::manager.get_running_id());
+    }
 }
 
-/**
- * @brief   Unlock mutex
- * @return  0 if success -1 otherwise
- */
+/*
+ * Description: This function releases a mutex.
+ * If there are blocked threads waiting for this mutex,
+ * one of them (no matter which one) moves to READY state.
+ * If the mutex is already unlocked, it is considered an error.
+ * Return value: On success, return 0. On failure, return -1.
+*/
 int uthread_mutex_unlock()
 {
-	if (ThreadManager::manager.get_mutex().state == MutexState::free)
-	{
-		fprintf(stderr, "thread library error: mutex error\n);
-		return -1;
-	}
-	return 0;
-	//todo: add unlock threads
+    if (ThreadManager::manager.get_mutex().state == MutexState::free)
+    {
+        fprintf(stderr, "thread library error: mutex error\n);
+        return -1;
+    }
+    return 0;
+    //todo: add unlock threads
 }
 
-/**
- * @brief   Get running thread ID
- * @return  Running thread ID
- */
+/*
+ * Description: This function returns the thread ID of the calling thread.
+ * Return value: The ID of the calling thread.
+*/
 int uthread_get_tid()
 {
-	return ThreadManager::manager.get_running_id();
+    return ThreadManager::manager.get_running_id();
 }
 
-/**
- * @brief   Get total threads quantums
- * @return  Number
- */
+/*
+ * Description: This function returns the total number of quantums since
+ * the library was initialized, including the current quantum.
+ * Right after the call to uthread_init, the value should be 1.
+ * Each time a new quantum starts, regardless of the reason, this number
+ * should be increased by 1.
+ * Return value: The total number of quantums.
+*/
 int uthread_get_total_quantums()
 {
-	return ThreadManager:: manager.get_quantum_usecs();
+    return ThreadManager::manager.get_quantum_usecs();
 }
 
-/**
- * @brief       Queantum of running thread
- * @param tid   Thread id
- * @return      Number
- */
+/*
+ * Description: This function returns the number of quantums the thread with
+ * ID tid was in RUNNING state. On the first time a thread runs, the function
+ * should return 1. Every additional quantum that the thread starts should
+ * increase this value by 1 (so if the thread with ID tid is in RUNNING state
+ * when this function is called, include also the current quantum). If no
+ * thread with ID tid exists it is considered an error.
+ * Return value: On success, return the number of quantums of the thread with ID tid.
+ * 			     On failure, return -1.
+*/
 int uthread_get_quantums(int tid)
 {
-	if (!ThreadManager::manager.valid_id(tid))
-	{
-		fprintf(stderr, "thread library error: invalid input\n);
-		return -1;
-	}
-	return ThreadManager::manager.get_thread_quantum(tid);
+    if (!ThreadManager::manager.valid_id(tid))
+    {
+        fprintf(stderr, "thread library error: invalid input\n);
+        return -1;
+    }
+    return ThreadManager::manager.get_thread_quantum(tid);
 }
