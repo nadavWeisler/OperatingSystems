@@ -5,6 +5,7 @@
 #include <signal.h>
 #include <sys/time.h>
 #include <algorithm>
+#include <string>
 
 #ifdef __x86_64__
 /* code for 64 bit Intel arch */
@@ -45,6 +46,29 @@ address_t translate_address(address_t addr)
 }
 
 #endif
+
+typedef ErrorType enum ErrorType
+{
+    system,
+    threadLibrary
+};
+
+/*
+ * Raise error msg
+ */
+void RaiseError(ErrorType type, string errorMsg)
+{
+    string startMsg = "%s";
+    if (type == ErrorType::system)
+    {
+        startMsg = "system error: %s";
+    }
+    else if (type == ErrorType::threadLibrary)
+    {
+        startMsg = "thread library error: %s"
+    }
+    fprintf(stderr, startMsg, errorMsg);
+}
 
 /*
  * Thread state enum
@@ -190,7 +214,7 @@ public
         // add sigprocmask checks
         if (sigsetjmp(this->threads[this->running_id]->env, 1))
         {
-            fprintf(stderr, "system error: masking failed");
+            RaiseError(ErrorType::system, "masking failed");
             return -1;
         }
         if (this->threads[this->running_id]->state == running) // if running is blocked
@@ -213,6 +237,18 @@ public
     bool valid_id(int id)
     {
         return this->threads[id] != nullptr && id <= MAX_THREAD_NUM && id >= 0;
+    }
+
+    bool id_exist(int id)
+    {
+        for (int i = 0; i < MAX_THREAD_NUM; i++)
+        {
+            if (this->threads[i] != nullptr && this->threads[i]->ID == id)
+            {
+                return true;
+            }
+        }
+        return false;
     }
 
     /**
@@ -273,7 +309,7 @@ public
     {
         if (tid == 0)
         {
-            fprintf(stderr, "thread library error: attempting to block the main thread\n");
+            RaiseError(ErrorType::threadLibrary, "attempting to block the main thread")
             return -1;
         }
         if (this->threads[tid]->state == blocked) // allready blocked
@@ -295,12 +331,12 @@ public
      */
     int resume_thread(int tid)
     {
-        if (this->threads[tid] != blocked) // thread dosnt need to be freed
+        if (this->threads[tid]->state == blocked)
         {
-            return 0;
+            this->threads[tid]->state = ready;
+            this->ready_threads.push_back(threads[tid])
         }
-        this->threads[tid]->state = ready;
-        this->ready_threads.push_back(threads[tid])
+        return 0;
     }
 
     int time()
@@ -311,7 +347,7 @@ public
         timer.it_interval.tv_usec = 0;
         if (setitimer(ITIMER_VIRTUAL, &timer, nullptr))
         {
-            fprintf(stderr, "system error: timer error\n");
+            RaiseError(ErrorType::system, "timer error");
             clean_exit();
             exit(1);
         }
@@ -344,7 +380,7 @@ int uthread_init(int quantum_usecs)
 {
     if (quantum_usecs <= 0)
     {
-        fprintf(stderr, "thread library error: invalid input\n");
+        RaiseError(ErrorType::threadLibrary, "invalid input");
         return -1;
     }
     ThreadManager::manager = new ThreadManager(
@@ -372,18 +408,18 @@ int uthread_spawn(void (*f)(void))
 {
     if (manager.get_thread_count() == MAX_THREAD_NUM)
     {
-        fprintf(stderr, "thread library error: reached maximum number of threads\n");
+        RaiseError(ErrorType::threadLibrary, "reached maximum number of threads")
         return -1;
     }
     if (!f)
     {
-        fprintf(stderr, "thread library error: invalid input\n");
+        RaiseError(ErrorType::threadLibrary, "invalid input")
         return -1;
     }
     int id = manager.get_new_id();
     if (id == -1)
     {
-        "thread library error: reached maximum number of threads\n"); // checked by max number?
+        RaiseError(ErrorType::threadLibrary, "reached maximum number of threads");
         return -1;
     }
     ThreadManager::manager.init_thread(id, f);
@@ -409,7 +445,7 @@ int uthread_terminate(int tid)
         ThreadManager::manager.free_thread(tid);
         return 0;
     }
-    fprintf(stderr, "thread library error: invalid input\n");
+    RaiseError(ErrorType::threadLibrary, "invalid input");
     return -1;
     //todo: release thread ID
 }
@@ -427,7 +463,7 @@ int uthread_block(int tid)
 {
     if (manager.get_new_id() == -1)
     {
-        fprintf(stderr, "thread library error: invalid input\n");
+        RaiseError(ErrorType::threadLibrary, "invalid input");
         return -1;
     }
     ThreadManager::manager.set_to_block(tid);
@@ -442,12 +478,14 @@ int uthread_block(int tid)
 */
 int uthread_resume(int tid)
 {
-    if (manager.get_new_id() == -1)
+    if (!ThreadManager::id_exist(tid))
     {
-        fprintf(stderr, "thread library error: invalid input\n");
-        return -1;
+        RaiseError(ErrorType::threadLibrary, "Thread doesn't exist");
     }
-    ThreadManager::manager.resume_thread();
+    else
+    {
+        ThreadManager::manager.resume_thread(tid);
+    }
 }
 
 /*
@@ -472,7 +510,7 @@ int uthread_mutex_lock()
         if (ThreadManager::manager.get_mutex().running_thread_id ==
             ThreadManager::manager.get_running_id())
         {
-            fprintf(stderr, "thread library error: mutex error\n);
+            RaiseError(ErrorType::threadLibrary, "mutex error");
             return -1;
         }
         int block_number = manager.get_mutex().num_of_blocked;
@@ -492,7 +530,7 @@ int uthread_mutex_unlock()
 {
     if (ThreadManager::manager.get_mutex().state == MutexState::free)
     {
-        fprintf(stderr, "thread library error: mutex error\n);
+        RaiseError(ErrorType::threadLibrary, "mutex error");
         return -1;
     }
     return 0;
@@ -535,7 +573,7 @@ int uthread_get_quantums(int tid)
 {
     if (!ThreadManager::manager.valid_id(tid))
     {
-        fprintf(stderr, "thread library error: invalid input\n);
+        RaiseError(ErrorType::threadLibrary, "invalid input");
         return -1;
     }
     return ThreadManager::manager.get_thread_quantum(tid);
