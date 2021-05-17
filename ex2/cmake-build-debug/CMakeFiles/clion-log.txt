@@ -1,1 +1,1 @@
-WSL not found at: C:\Users\Weisl\AppData\Local\Microsoft\WindowsApps\ubuntu.exe Configure Disable profile
+CMake executable not found: \\wsl$\Ubuntu\usr\bin\cmake Configure Disable profile

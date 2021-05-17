@@ -1,5 +1,5 @@
 #include "uthreads.h"
-#include <queue>
+#include <deque>
 #include <stdio.h>
 #include <setjmp.h>
 #include <signal.h>
@@ -56,7 +56,7 @@ typedef ErrorType enum ErrorType
 /*
  * Raise error msg
  */
-void RaiseError(ErrorType type, string errorMsg)
+void raise_error(ErrorType type, string errorMsg)
 {
     string startMsg = "%s";
     if (type == ErrorType::system)
@@ -122,7 +122,7 @@ private:
     int thread_count = 0;
     int quantum_usecs;
     int total_quantum = 0;
-    queue<int> ready_threads;
+    deque<int> ready_threads;
     Mutex mutex = {MutexState::free, 0, nullptr};
     Thread *threads[MAX_THREAD_NUM]; //
     sigset_t mask;
@@ -214,7 +214,7 @@ public
         // add sigprocmask checks
         if (sigsetjmp(this->threads[this->running_id]->env, 1))
         {
-            RaiseError(ErrorType::system, "masking failed");
+            raise_error(ErrorType::system, "masking failed");
             return -1;
         }
         if (this->threads[this->running_id]->state == running) // if running is blocked
@@ -305,23 +305,25 @@ public
      * @param tid   Thread ID
      * @return      0 if success, -1 otherwise
      */
-    int set_to_block(int tid)
+    int block_thread(int tid)
     {
         if (tid == 0)
         {
-            RaiseError(ErrorType::threadLibrary, "attempting to block the main thread")
+            raise_error(ErrorType::threadLibrary, "attempting to block the main thread")
             return -1;
         }
-        if (this->threads[tid]->state == blocked) // allready blocked
+        if (this->threads[tid]->state != ThreadState::blocked) // allready blocked
         {
-            return 0;
+            this->threads[tid]->state = ThreadState::blocked;
+            this->ready_threads.erase(
+                    std::remove(this->ready_threads.begin(), this->ready_threads.end(), tid),
+                    this->ready_threads.end());
+            if (this->running_id == tid) // blocked thread is current running
+            {
+                return this->manage_ready();
+            }
         }
-        this->threads[tid]->state = blocked;
-        // need to remove from ready q
-        if (this->running_id == tid) // blocked thred is currenlty running
-        {
-            this->manage_ready();
-        }
+        return 0;
     }
 
     /**
@@ -347,7 +349,7 @@ public
         timer.it_interval.tv_usec = 0;
         if (setitimer(ITIMER_VIRTUAL, &timer, nullptr))
         {
-            RaiseError(ErrorType::system, "timer error");
+            raise_error(ErrorType::system, "timer error");
             clean_exit();
             exit(1);
         }
@@ -355,7 +357,7 @@ public
 
     int clean_exit()
     {
-        // todo free memeory
+        // todo free memory
         for (int i = 0; i < MAX_THREAD_NUM; i++)
         {
             this->threads[i] = nullptr;
@@ -380,15 +382,15 @@ int uthread_init(int quantum_usecs)
 {
     if (quantum_usecs <= 0)
     {
-        RaiseError(ErrorType::threadLibrary, "invalid input");
+        raise_error(ErrorType::threadLibrary, "invalid input");
         return -1;
     }
-    ThreadManager::manager = new ThreadManager(
+    manager = new ThreadManager(
             quantum_usecs); // not sure if memory should be allocted
     // need to add sigaddset, sigempty set,  SIGVTALRM,sa_hanlder
-    if (!ThreadManager::manager)
+    if (!manager)
     {
-        printf(stderr, "system error: memory allocation failed\n");
+        raise_error(ErrorType::system, "memory allocation failed")
         exit(1);
     }
     return 0;
@@ -408,23 +410,22 @@ int uthread_spawn(void (*f)(void))
 {
     if (manager.get_thread_count() == MAX_THREAD_NUM)
     {
-        RaiseError(ErrorType::threadLibrary, "reached maximum number of threads")
+        raise_error(ErrorType::threadLibrary, "reached maximum number of threads")
         return -1;
     }
     if (!f)
     {
-        RaiseError(ErrorType::threadLibrary, "invalid input")
+        raise_error(ErrorType::threadLibrary, "invalid input")
         return -1;
     }
     int id = manager.get_new_id();
     if (id == -1)
     {
-        RaiseError(ErrorType::threadLibrary, "reached maximum number of threads");
+        raise_error(ErrorType::threadLibrary, "reached maximum number of threads");
         return -1;
     }
-    ThreadManager::manager.init_thread(id, f);
-    ThreadManager::manager.manage_ready();
-    return 0;
+    manager.init_thread(id, f);
+    return manager.manage_ready();
 }
 
 /*
@@ -440,14 +441,18 @@ int uthread_spawn(void (*f)(void))
 */
 int uthread_terminate(int tid)
 {
-    if (ThreadManager::manager.valid_id(tid))
+    if (!manager.id_exist(tid))
     {
-        ThreadManager::manager.free_thread(tid);
-        return 0;
+        raise_error(ErrorType::threadLibrary, "Thread id does not exist");
+        return -1;
     }
-    RaiseError(ErrorType::threadLibrary, "invalid input");
-    return -1;
-    //todo: release thread ID
+    manager.free_thread(tid);
+    if(tid == 0) //Terminate main thread
+    {
+        free(manager);
+        exit(0);
+    }
+    return 0;
 }
 
 /*
@@ -461,12 +466,12 @@ int uthread_terminate(int tid)
 */
 int uthread_block(int tid)
 {
-    if (manager.get_new_id() == -1)
+    if (!manager.id_exist(tid))
     {
-        RaiseError(ErrorType::threadLibrary, "invalid input");
+        raise_error(ErrorType::threadLibrary, "Thread doesn't exist");
         return -1;
     }
-    ThreadManager::manager.set_to_block(tid);
+    return manager.block_thread(tid);
 }
 
 /*
@@ -478,14 +483,12 @@ int uthread_block(int tid)
 */
 int uthread_resume(int tid)
 {
-    if (!ThreadManager::id_exist(tid))
+    if (!manager.id_exist(tid))
     {
-        RaiseError(ErrorType::threadLibrary, "Thread doesn't exist");
+        raise_error(ErrorType::threadLibrary, "Thread doesn't exist");
+        return -1;
     }
-    else
-    {
-        ThreadManager::manager.resume_thread(tid);
-    }
+    return manager.resume_thread(tid);
 }
 
 /*
@@ -499,23 +502,23 @@ int uthread_resume(int tid)
 */
 int uthread_mutex_lock()
 {
-    if (ThreadManager::manager.get_mutex().state == MutexState::free)
+    if (manager.get_mutex().state == MutexState::free)
     {
-        ThreadManager::manager.get_mutex().state == MutexState::free;
-        ThreadManager::manager.get_mutex().running_thread_id = manager.get_running_id();
+        manager.get_mutex().state == MutexState::free;
+        manager.get_mutex().running_thread_id = manager.get_running_id();
         return 0;
     }
-    else if (ThreadManager::manager.get_mutex().state == MutexState::locked)
+    else if (manager.get_mutex().state == MutexState::locked)
     {
-        if (ThreadManager::manager.get_mutex().running_thread_id ==
-            ThreadManager::manager.get_running_id())
+        if (manager.get_mutex().running_thread_id ==
+            manager.get_running_id())
         {
-            RaiseError(ErrorType::threadLibrary, "mutex error");
+            raise_error(ErrorType::threadLibrary, "mutex error");
             return -1;
         }
         int block_number = manager.get_mutex().num_of_blocked;
-        ThreadManager::manager.get_mutex().blocked_list[block_number] = ThreadManager::manager.get_running_id();
-        ThreadManager::manager.set_to_block(ThreadManager::manager.get_running_id());
+        manager.get_mutex().blocked_list[block_number] = manager.get_running_id();
+        manager.block_thread(manager.get_running_id());
     }
 }
 
@@ -528,9 +531,9 @@ int uthread_mutex_lock()
 */
 int uthread_mutex_unlock()
 {
-    if (ThreadManager::manager.get_mutex().state == MutexState::free)
+    if (manager.get_mutex().state == MutexState::free)
     {
-        RaiseError(ErrorType::threadLibrary, "mutex error");
+        raise_error(ErrorType::threadLibrary, "mutex error");
         return -1;
     }
     return 0;
@@ -543,7 +546,7 @@ int uthread_mutex_unlock()
 */
 int uthread_get_tid()
 {
-    return ThreadManager::manager.get_running_id();
+    return manager.get_running_id();
 }
 
 /*
@@ -556,7 +559,7 @@ int uthread_get_tid()
 */
 int uthread_get_total_quantums()
 {
-    return ThreadManager::manager.get_quantum_usecs();
+    return manager.get_quantum_usecs();
 }
 
 /*
@@ -571,10 +574,10 @@ int uthread_get_total_quantums()
 */
 int uthread_get_quantums(int tid)
 {
-    if (!ThreadManager::manager.valid_id(tid))
+    if (!manager.valid_id(tid))
     {
-        RaiseError(ErrorType::threadLibrary, "invalid input");
+        raise_error(ErrorType::threadLibrary, "invalid input");
         return -1;
     }
-    return ThreadManager::manager.get_thread_quantum(tid);
+    return manager.get_thread_quantum(tid);
 }
