@@ -132,7 +132,8 @@ private:
 
 public
     //Singleton
-    static *ThreadManager manager;
+    static *
+    ThreadManager manager;
 
     /**
      * @brief                   Singleton constructor
@@ -152,29 +153,29 @@ public
         this->thread_count++;
         if (sigemptyset(&this->mask)) // inits mask
         {
-            raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+            raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
             clean_exit();
         }
         if (sigaddset(&this->mask, SIGVTALRM)) // adds signal
         {
-            raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+            raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
             clean_exit();
         }
         if (sigprocmask(SIG_SETMASK, &this->mask, nullptr) == -1) // sets the mask
         {
-            raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+            raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
             clean_exit();
         }
         struct sigaction sa{};
         sa.sa_handler = &static_manage;
         if (sigaction(SIGVTALRM, &sa, nullptr) < 0)  // add action to the SIGVTALRM signal
         {
-            raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+            raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
             clean_exit();
         }
         if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
         {
-            raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+            raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
             clean_exit();
         }
     }
@@ -182,8 +183,9 @@ public
     /*
      * wraper for the manage ready function
      */
-    static void static_manage(int sig) {
-        (void)sig;
+    static void static_manage(int sig)
+    {
+        (void) sig;
         manager->manage_ready();
     }
 
@@ -266,16 +268,17 @@ public
         // add sigprocmask checks
         if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1)
         {
-            this->raise_error(ErrorType::system, ErrorMessages:: MaskingFailed);
+            this->raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
             this->clean_exit();
         }
         if (sigsetjmp(this->threads[this->running_id]->env, 1)) // saves the current thread env
         {
-           if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) {
-               this->raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
-               this->clean_exit();
-           }
-           return; // todo check forum
+            if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1)
+            {
+                this->raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
+                this->clean_exit();
+            }
+            return; // todo check forum
         }
         if (this->threads[this->running_id]->state == running) // if running is blocked
         {
@@ -286,7 +289,8 @@ public
         this->threads[this->running_id]->quantum++;
         this->total_quantum++;
         this->threads[this->running_id]->state = running;
-        if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) {
+        if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1)
+        {
             this->raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
             this->clean_exit();
         }
@@ -297,11 +301,11 @@ public
     int get_next_thread()
     {
         id = this->ready_threads.popfront();
-        while((this->threads[id]->state == ThreadState::ready))
+        while ((this->threads[id]->state == ThreadState::ready))
         {
             if (this->threads[id]->state == ThreadState::mutex_block)
             {
-                if (this->lock_mutex(id) == 0)
+                if (this->lock_mutex(id))
                 {
                     return id;
                 }
@@ -334,15 +338,15 @@ public
         return false;
     }
 
-    int lock_mutex(int id)
+    bool lock_mutex(int id)
     {
         if (this->mutex.state == MutexState::free)
         {
-            mutex.state == MutexState ::locked;
+            mutex.state == MutexState::locked;
             mutex.running_thread_id = tid;
-            return 0;
+            return true;
         }
-        return -1;
+        return false;
     }
 
     /**
@@ -394,6 +398,11 @@ public
         return this->running_id;
     }
 
+    bool is_main_thread(int tid)
+    {
+        return tid == 0;
+    }
+
     /**
      * @brief       Block thread
      * @param tid   Thread ID
@@ -401,12 +410,13 @@ public
      */
     int block_thread(int tid)
     {
-        if (tid == 0)
+        if (this->is_main_thread(tid))
         {
             this->raise_error(ErrorType::threadLibrary, ErrorMessages::MainThreadBlock)
             return ReturnValue::failure;
         }
-        if (this->threads[tid]->state == ThreadState::ready || this->threads[tid]->state == ThreadState::running) // allready blocked
+        if (this->threads[tid]->state == ThreadState::ready ||
+            this->threads[tid]->state == ThreadState::running) // allready blocked
         {
             this->threads[tid]->state = ThreadState::blocked;
             if (this->running_id == tid) // blocked thread is current running
@@ -459,18 +469,19 @@ public
         {
             this->manage_ready(); // check if okay, if not add state
         }
-        this->ready_threads.erase(std::remove(this->ready_threads.begin(), this->ready_threads.end(), tid),
+        this->ready_threads.erase(
+                std::remove(this->ready_threads.begin(), this->ready_threads.end(), tid),
                 this->ready_threads.end());
         this->free_thread(tid);
     }
 
-    this unlock_mutex()
+    void unlock_mutex()
     {
         if (this->mutex.state == MutexState::free)
         {
             clean_exit();
         }
-        this->mutex.state = MutexState ::free;
+        this->mutex.state = MutexState::free;
         this->mutex.running_thread_id = -1;
     }
 
@@ -490,6 +501,15 @@ public
 // need to use singleton
 ThreadManager manager;
 
+bool block_signals()
+{
+    return sigprocmask(SIG_BLOCK, &this->mask, nullptr) != ReturnValue::failure;
+}
+
+bool unblock_signals() {
+    return sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) != ReturnValue::failure;
+}
+
 /*
  * Description: This function initializes the thread library.
  * You may assume that this function is called before any other thread library
@@ -505,7 +525,8 @@ int uthread_init(int quantum_usecs)
         manager.raise_error(ErrorType::threadLibrary, ErrorMessages::InvalidInput);
         return ReturnValue::failure;
     }
-     ThreadManager::manager = new ThreadManager(quantum_usecs); // not sure if memory should be allocated
+    ThreadManager::manager = new ThreadManager(
+            quantum_usecs); // not sure if memory should be allocated
     if (!ThreadManager::manager)
     {
         ThreadManager::manager.raise_error(ErrorType::system, ErrorMessages::MemoryAllocFailed);
@@ -536,18 +557,19 @@ int uthread_spawn(void (*f)(void))
         manager.raise_error(ErrorType::threadLibrary, ErrorMessages::InvalidInput);
         return ReturnValue::failure;
     }
-    if (sigprocmask(SIG_BLOCK, &this->mask, nullptr) == -1) // block the singls
+    if (!block_signals()) // block the singls
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     int id = manager.get_new_id();
     manager.init_thread(id, f);
-    if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
+    if (!unblock_signals()) // unblock the singls
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
+    return ReturnValue::success;
 }
 
 /*
@@ -568,15 +590,15 @@ int uthread_terminate(int tid)
         manager.raise_error(ErrorType::threadLibrary, ErrorMessages::ThreadDoesNotExist);
         return ReturnValue::failure;
     }
-    if (sigprocmask(SIG_BLOCK, &this->mask, nullptr) == -1) // block the singls
+    if (!block_signals()) // block the singls
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     ThreadManager::manager.terminate(tid);
-    if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
+    if (!unblock_signals()) // unblock the singls
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     return ReturnValue::success;
@@ -598,19 +620,18 @@ int uthread_block(int tid)
         manager.raise_error(ErrorType::threadLibrary, ErrorMessages::ThreadDoesNotExist);
         return ReturnValue::failure;
     }
-    if (sigprocmask(SIG_BLOCK, &this->mask, nullptr) == -1) // block the singls
+    if (!block_signals()) // block the singls
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     ThreadManager::manager.block_thread(tid);
-    if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
+    if (!unblock_signals()) // unblock the singls
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
-    return ReturnValue :: success;
-
+    return ReturnValue::success;
 }
 
 /*
@@ -627,18 +648,18 @@ int uthread_resume(int tid)
         manager.raise_error(ErrorType::threadLibrary, ErrorMessages::ThreadDoesNotExist);
         return ReturnValue::failure;
     }
-    if (sigprocmask(SIG_BLOCK, &this->mask, nullptr) == -1) // block the singls
+    if (!block_signals()) // block the singls
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     ThreadManager::manager.resume_thread(tid);
-    if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
+    if (!unblock_signals()) // unblock the singls
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
-    return ReturnValue :: success;
+    return ReturnValue::success;
 }
 
 /*
@@ -652,18 +673,18 @@ int uthread_resume(int tid)
 */
 int uthread_mutex_lock()
 {
-    if (sigprocmask(SIG_BLOCK, &this->mask, nullptr) == -1) // block the singls
+    if (!block_signals())
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     ThreadManager::manager.lock_mutex(ThreadManager::manager.get_running_id());
-    if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
+    if (!unblock_signals())
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
-    return ReturnValue :: success;
+    return ReturnValue::success;
 }
 
 /*
@@ -675,32 +696,33 @@ int uthread_mutex_lock()
 */
 int uthread_mutex_unlock()
 {
-    if (sigprocmask(SIG_BLOCK, &this->mask, nullptr) == -1) // block the singls
+    if (!block_signals())
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     ThreadManager::manager.unlock_mutex();
-    if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
+    if (!unblock_signals())
     {
-        raise_error(ErrorType:: system, ErrorMessages::MaskingFailed);
+        raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
-    return ReturnValue :: success;
+    return ReturnValue::success;
 }
 
 /*
  * Description: This function returns the thread ID of the calling thread.
  * Return value: The ID of the calling thread.
 */
-int uthread_get_tid() {
-    if (sigprocmask(SIG_BLOCK, &this->mask, nullptr) == -1) // block the singls
+int uthread_get_tid()
+{
+    if (!block_signals())
     {
         raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     ThreadManager::manager.get_running_id();
-    if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
+    if (!unblock_signals()) // unblock the singls
     {
         raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
@@ -718,13 +740,13 @@ int uthread_get_tid() {
 */
 int uthread_get_total_quantums()
 {
-    if (sigprocmask(SIG_BLOCK, &this->mask, nullptr) == -1) // block the singls
+    if (!block_signals())
     {
         raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     ThreadManager::manager.get_quantum_usecs();
-    if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
+    if (!unblock_signals())
     {
         raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
@@ -749,13 +771,13 @@ int uthread_get_quantums(int tid)
         raise_error(ErrorType::threadLibrary, ErrorMessages::InvalidInput);
         return ReturnValue::failure;
     }
-    if (sigprocmask(SIG_BLOCK, &this->mask, nullptr) == -1) // block the singls
+    if (!block_signals())
     {
         raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
     }
     ThreadManager::manager.get_thread_quantum(tid);
-    if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) // unblock the singls
+    if (!unblock_signals())
     {
         raise_error(ErrorType::system, ErrorMessages::MaskingFailed);
         clean_exit();
