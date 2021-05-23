@@ -88,6 +88,24 @@ struct Thread {
     ThreadState state;
     sigjmp_buf env; // an array keeping al the data of the thread
     char stack[STACK_SIZE];
+
+    Thread(int ID,  void (*f)(void)) :(ID(ID), quantum(0), state(ThreadState::ready),env())
+    {
+        if (id == 0) // main thread
+        {
+            return ;
+        }
+        address_t sp, pc;
+        sp = (address_t) stack + STACK_SIZE - sizeof(address_t);
+        pc = (address_t) f;
+        sigsetjmp(newThread->env, 1);
+        (env->__jmpbuf)[JB_SP] = translate_address(sp);
+        (env->__jmpbuf)[JB_PC] = translate_address(pc);
+        if (sigemptyset(&env->__saved_mask)) {
+            // error message
+            exit(-1);
+        }
+    }
 } typedef Thread;
 
 /*
@@ -130,7 +148,8 @@ public:
         for (int i = 0; i < MAX_THREAD_NUM; i++) {
             threads[i] = nullptr;
         }
-        Thread main = {0, 1, running, nullptr};
+        Thread main = Thread(0, nullptr);
+        main.state = ThreadState::running;
         threads[0] = &main; // check for point fichs
         this->thread_count++;
         if (sigemptyset(&this->mask)) // inits mask
@@ -190,17 +209,7 @@ public:
      * @return      0 if success, -1 otherwise
      */
     int init_thread(int id, void (*f)(void)) {
-        Thread newThread = {id, 0, ready, f};
-        address_t sp, pc;
-        sp = (address_t) stack1 + STACK_SIZE - sizeof(address_t);
-        pc = (address_t) f;
-        sigsetjmp(newThread->env, 1);
-        (newThread->env->__jmpbuf)[JB_SP] = translate_address(sp);
-        (newThread->env->__jmpbuf)[JB_PC] = translate_address(pc);
-        if (sigemptyset(&newThread->env->__saved_mask)) {
-            // error message
-            exit(-1);
-        }
+        Thread newThread = Thread(id, f);
         this->thread_count++;
         this->ready_threads.push_back(id);
         this->threads[id] = &newThread;
