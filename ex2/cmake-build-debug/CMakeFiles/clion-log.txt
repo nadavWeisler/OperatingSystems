@@ -1,1 +1,33 @@
-CMake executable not found: \\wsl$\Ubuntu\usr\bin\cmake Configure Disable profile
+/usr/local/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -DCMAKE_BUILD_TYPE=Debug -G "CodeBlocks - Unix Makefiles" /cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex2
+CMake Warning (dev) at CMakeLists.txt:3 (project):
+  Policy CMP0048 is not set: project() command manages VERSION variables.
+  Run "cmake --help-policy CMP0048" for policy details.  Use the cmake_policy
+  command to set the policy and suppress this warning.
+
+  The following variable(s) would be set to empty:
+
+    CMAKE_PROJECT_VERSION
+    CMAKE_PROJECT_VERSION_MAJOR
+    CMAKE_PROJECT_VERSION_MINOR
+This warning is for project developers.  Use -Wno-dev to suppress it.
+
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex2/cmake-build-debug/googletest-download
+[ 11%] Performing download step (git clone) for 'googletest'
+Cloning into 'googletest-src'...
+
+Already on 'master'
+Your branch is up to date with 'origin/master'.
+[ 22%] No patch step for 'googletest'
+[ 33%] Performing update step for 'googletest'
+Current branch master is up to date.
+[ 44%] No configure step for 'googletest'
+[ 55%] No build step for 'googletest'
+[ 66%] No install step for 'googletest'
+[ 77%] No test step for 'googletest'
+[ 88%] Completed 'googletest'
+[100%] Built target googletest
+-- Configuring done
+-- Generating done
+-- Build files have been written to: /cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex2/cmake-build-debug

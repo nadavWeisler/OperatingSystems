@@ -1,7 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
-    <generated />
+    <generated>
+      <config projectName="testers" targetName="gtest_main" />
+      <config projectName="testers" targetName="gmock" />
+      <config projectName="testers" targetName="theTests" />
+      <config projectName="testers" targetName="gtest" />
+      <config projectName="testers" targetName="gmock_main" />
+    </generated>
   </component>
   <component name="CMakeSettings">
     <configurations>
@@ -9,7 +15,15 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="b0280425-9c9a-469a-ba61-6f34bcd480f3" name="Default Changelist" comment="" />
+    <list default="true" id="b0280425-9c9a-469a-ba61-6f34bcd480f3" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/ex2/CMakeLists.txt.in" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ex2/tests_to_be_ran_separately.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/OperatingSystems.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/OperatingSystems.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ex2/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ex2/CMakeLists.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ex2/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ex2/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ex2/uthreads.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ex2/uthreads.cpp" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -18,6 +32,7 @@
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="CMakeBuildProfile:Debug" />
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
@@ -29,8 +44,104 @@
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="cf.advertisement.text.has.clang-format" value="true" />
     <property name="cf.first.check.clang-format" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/ex1" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/ex2" />
+    <property name="settings.editor.selected.configurable" value="preferences.lookFeel" />
+  </component>
+  <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/ex2" />
+    </key>
+  </component>
+  <component name="RunManager" selected="Google Test.Test11.MutexTest5">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test10.MutexTest4" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test10" TEST_METHOD="MutexTest4" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test11.MutexTest5" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test11" TEST_METHOD="MutexTest5" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test7.MutexTest1" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test7" TEST_METHOD="MutexTest1" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test8.MutexTest2" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test8" TEST_METHOD="MutexTest2" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="Test9.MutexTest3" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test9" TEST_METHOD="MutexTest3" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="theTests" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" CONFIG_NAME="Debug" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_MODE="SUITE_TEST">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gmock" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="gmock" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gmock_main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="gmock_main" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gtest" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="gtest" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration name="gtest_main" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="gtest_main" CONFIG_NAME="Debug">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <list>
+      <item itemvalue="CMake Application.gmock" />
+      <item itemvalue="CMake Application.gmock_main" />
+      <item itemvalue="CMake Application.gtest" />
+      <item itemvalue="CMake Application.gtest_main" />
+      <item itemvalue="Google Test.theTests" />
+      <item itemvalue="Google Test.Test7.MutexTest1" />
+      <item itemvalue="Google Test.Test8.MutexTest2" />
+      <item itemvalue="Google Test.Test9.MutexTest3" />
+      <item itemvalue="Google Test.Test10.MutexTest4" />
+      <item itemvalue="Google Test.Test11.MutexTest5" />
+    </list>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Google Test.Test11.MutexTest5" />
+        <item itemvalue="Google Test.Test10.MutexTest4" />
+        <item itemvalue="Google Test.Test9.MutexTest3" />
+        <item itemvalue="Google Test.Test8.MutexTest2" />
+        <item itemvalue="Google Test.Test7.MutexTest1" />
+      </list>
+    </recent_temporary>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TaskManager">
@@ -41,6 +152,8 @@
       <option name="presentableId" value="Default" />
       <updated>1617698822103</updated>
       <workItem from="1617698823126" duration="970000" />
+      <workItem from="1621759930983" duration="3081000" />
+      <workItem from="1621766556749" duration="18246000" />
     </task>
     <servers />
   </component>
@@ -48,13 +161,75 @@
     <option name="version" value="3" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="743" y="300" width="432" height="484" key="FileChooserDialogImpl" timestamp="1617700004765">
-      <screen x="0" y="27" width="1920" height="1028" />
+    <state x="418" y="200" width="1084" height="834" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1621766933838">
+      <screen x="0" y="26" width="1920" height="1029" />
     </state>
+    <state x="418" y="200" width="1084" height="834" key="#com.intellij.execution.impl.EditConfigurationsDialog/0.26.1920.1029@0.26.1920.1029" timestamp="1621766933838" />
+    <state x="173" y="343" width="608" height="392" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1621766653540">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state x="173" y="343" width="608" height="392" key="#com.intellij.fileTypes.FileTypeChooser/0.26.1920.1029@0.26.1920.1029" timestamp="1621766653540" />
+    <state x="743" y="299" width="432" height="483" key="FileChooserDialogImpl" timestamp="1621760239734">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state x="743" y="299" width="432" height="483" key="FileChooserDialogImpl/0.26.1920.1029@0.26.1920.1029" timestamp="1621760239734" />
     <state x="743" y="300" width="432" height="484" key="FileChooserDialogImpl/0.27.1920.1028@0.27.1920.1028" timestamp="1617700004765" />
-    <state x="759" y="458" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1617699792557">
-      <screen x="0" y="27" width="1920" height="1028" />
+    <state width="1876" height="272" key="GridCell.Tab.0.bottom" timestamp="1621787923495">
+      <screen x="0" y="26" width="1920" height="1029" />
     </state>
+    <state width="1876" height="272" key="GridCell.Tab.0.bottom/0.26.1920.1029@0.26.1920.1029" timestamp="1621787923495" />
+    <state width="1876" height="272" key="GridCell.Tab.0.center" timestamp="1621787923495">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state width="1876" height="272" key="GridCell.Tab.0.center/0.26.1920.1029@0.26.1920.1029" timestamp="1621787923495" />
+    <state width="1876" height="272" key="GridCell.Tab.0.left" timestamp="1621787923495">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state width="1876" height="272" key="GridCell.Tab.0.left/0.26.1920.1029@0.26.1920.1029" timestamp="1621787923495" />
+    <state width="1876" height="272" key="GridCell.Tab.0.right" timestamp="1621787923495">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state width="1876" height="272" key="GridCell.Tab.0.right/0.26.1920.1029@0.26.1920.1029" timestamp="1621787923495" />
+    <state width="1876" height="336" key="GridCell.Tab.1.bottom" timestamp="1621782636211">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state width="1876" height="336" key="GridCell.Tab.1.bottom/0.26.1920.1029@0.26.1920.1029" timestamp="1621782636211" />
+    <state width="1876" height="336" key="GridCell.Tab.1.center" timestamp="1621782636211">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state width="1876" height="336" key="GridCell.Tab.1.center/0.26.1920.1029@0.26.1920.1029" timestamp="1621782636211" />
+    <state width="1876" height="336" key="GridCell.Tab.1.left" timestamp="1621782636211">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state width="1876" height="336" key="GridCell.Tab.1.left/0.26.1920.1029@0.26.1920.1029" timestamp="1621782636210" />
+    <state width="1876" height="336" key="GridCell.Tab.1.right" timestamp="1621782636211">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state width="1876" height="336" key="GridCell.Tab.1.right/0.26.1920.1029@0.26.1920.1029" timestamp="1621782636211" />
+    <state x="456" y="177" key="SettingsEditor" timestamp="1621762143977">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state x="456" y="177" key="SettingsEditor/0.26.1920.1029@0.26.1920.1029" timestamp="1621762143977" />
+    <state x="759" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1621760486994">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state x="759" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.26.1920.1029@0.26.1920.1029" timestamp="1621760486994" />
     <state x="759" y="458" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.27.1920.1028@0.27.1920.1028" timestamp="1617699792557" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/ex2/tests_to_be_ran_separately.cpp</url>
+          <line>98</line>
+          <option name="timeStamp" value="4" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
+          <url>file://$PROJECT_DIR$/ex2/tests_to_be_ran_separately.cpp</url>
+          <line>169</line>
+          <option name="timeStamp" value="6" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
   </component>
 </project>
