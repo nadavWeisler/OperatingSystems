@@ -954,7 +954,7 @@ TEST(Test14, MutexTest8)
     };
 
     auto t2 = [] {
-
+        fprintf(stdout, "T2\n");
         EXPECT_EQ(uthread_get_tid(), 2);
 
         EXPECT_EQ(uthread_mutex_lock(),0);
@@ -966,13 +966,17 @@ TEST(Test14, MutexTest8)
     };
 
     auto t3 = []{
+        fprintf(stdout, "T3\n");
 
         EXPECT_EQ(uthread_get_tid(), 3);
 
         EXPECT_EQ(uthread_mutex_lock(),0);
 
+        fprintf(stdout, "BEFORE\n");
 
         EXPECT_TRUE(ran);
+
+        fprintf(stdout, "AFTER\n");
 
         ran2 = true;
 

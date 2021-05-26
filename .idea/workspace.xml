@@ -16,12 +16,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="b0280425-9c9a-469a-ba61-6f34bcd480f3" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/ex2/CMakeLists.txt.in" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/ex2/tests_to_be_ran_separately.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/OperatingSystems.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/OperatingSystems.iml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/ex2/Makefile" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/ex2/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ex2/CMakeLists.txt" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ex2/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" afterPath="$PROJECT_DIR$/ex2/cmake-build-debug/CMakeFiles/clion-log.txt" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/ex2/tests_to_be_ran_separately.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ex2/tests_to_be_ran_separately.cpp" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/ex2/uthreads.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/ex2/uthreads.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -54,37 +52,32 @@
       <recent name="$PROJECT_DIR$/ex2" />
     </key>
   </component>
-  <component name="RunManager" selected="Google Test.Test11.MutexTest5">
-    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
-      </method>
-    </configuration>
-    <configuration name="Test10.MutexTest4" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test10" TEST_METHOD="MutexTest4" TEST_MODE="SUITE_TEST">
+  <component name="RunManager" selected="Google Test.Test14.MutexTest8">
+    <configuration name="Test13.MutexTest7" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test13" TEST_METHOD="MutexTest7" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test11.MutexTest5" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test11" TEST_METHOD="MutexTest5" TEST_MODE="SUITE_TEST">
+    <configuration name="Test14.MutexTest8" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test14" TEST_METHOD="MutexTest8" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test7.MutexTest1" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test7" TEST_METHOD="MutexTest1" TEST_MODE="SUITE_TEST">
+    <configuration name="Test1.BasicFunctionality" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test1" TEST_METHOD="BasicFunctionality" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test8.MutexTest2" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test8" TEST_METHOD="MutexTest2" TEST_MODE="SUITE_TEST">
+    <configuration name="Test2.ThreadSchedulingWithTermination" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test2" TEST_METHOD="ThreadSchedulingWithTermination" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
       </method>
     </configuration>
-    <configuration name="Test9.MutexTest3" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test9" TEST_METHOD="MutexTest3" TEST_MODE="SUITE_TEST">
+    <configuration name="Test3.ThreadExecutionOrder" type="CMakeGoogleTestRunConfigurationType" factoryName="Google Test" temporary="true" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="theTests" RUN_TARGET_PROJECT_NAME="testers" RUN_TARGET_NAME="theTests" TEST_CLASS="Test3" TEST_METHOD="ThreadExecutionOrder" TEST_MODE="SUITE_TEST">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
@@ -94,6 +87,11 @@
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
         <option name="BeforeTestRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="gmock" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="testers" TARGET_NAME="gmock" CONFIG_NAME="Debug">
@@ -127,19 +125,19 @@
       <item itemvalue="CMake Application.gtest" />
       <item itemvalue="CMake Application.gtest_main" />
       <item itemvalue="Google Test.theTests" />
-      <item itemvalue="Google Test.Test7.MutexTest1" />
-      <item itemvalue="Google Test.Test8.MutexTest2" />
-      <item itemvalue="Google Test.Test9.MutexTest3" />
-      <item itemvalue="Google Test.Test10.MutexTest4" />
-      <item itemvalue="Google Test.Test11.MutexTest5" />
+      <item itemvalue="Google Test.Test13.MutexTest7" />
+      <item itemvalue="Google Test.Test1.BasicFunctionality" />
+      <item itemvalue="Google Test.Test2.ThreadSchedulingWithTermination" />
+      <item itemvalue="Google Test.Test3.ThreadExecutionOrder" />
+      <item itemvalue="Google Test.Test14.MutexTest8" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Google Test.Test11.MutexTest5" />
-        <item itemvalue="Google Test.Test10.MutexTest4" />
-        <item itemvalue="Google Test.Test9.MutexTest3" />
-        <item itemvalue="Google Test.Test8.MutexTest2" />
-        <item itemvalue="Google Test.Test7.MutexTest1" />
+        <item itemvalue="Google Test.Test14.MutexTest8" />
+        <item itemvalue="Google Test.Test13.MutexTest7" />
+        <item itemvalue="Google Test.Test3.ThreadExecutionOrder" />
+        <item itemvalue="Google Test.Test2.ThreadSchedulingWithTermination" />
+        <item itemvalue="Google Test.Test1.BasicFunctionality" />
       </list>
     </recent_temporary>
   </component>
@@ -153,12 +151,25 @@
       <updated>1617698822103</updated>
       <workItem from="1617698823126" duration="970000" />
       <workItem from="1621759930983" duration="3081000" />
-      <workItem from="1621766556749" duration="18246000" />
+      <workItem from="1621766556749" duration="18486000" />
+      <workItem from="1622014152287" duration="4079000" />
     </task>
+    <task id="LOCAL-00001" summary="Father of all commits">
+      <created>1621788187046</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1621788187046</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="Father of all commits" />
+    <option name="LAST_COMMIT_MESSAGE" value="Father of all commits" />
   </component>
   <component name="WindowStateProjectService">
     <state x="418" y="200" width="1084" height="834" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1621766933838">
@@ -169,65 +180,72 @@
       <screen x="0" y="26" width="1920" height="1029" />
     </state>
     <state x="173" y="343" width="608" height="392" key="#com.intellij.fileTypes.FileTypeChooser/0.26.1920.1029@0.26.1920.1029" timestamp="1621766653540" />
+    <state x="496" y="102" width="926" height="878" key="CommitChangelistDialog2" timestamp="1621788186632">
+      <screen x="0" y="26" width="1920" height="1029" />
+    </state>
+    <state x="496" y="102" width="926" height="878" key="CommitChangelistDialog2/0.26.1920.1029@0.26.1920.1029" timestamp="1621788186632" />
     <state x="743" y="299" width="432" height="483" key="FileChooserDialogImpl" timestamp="1621760239734">
       <screen x="0" y="26" width="1920" height="1029" />
     </state>
     <state x="743" y="299" width="432" height="483" key="FileChooserDialogImpl/0.26.1920.1029@0.26.1920.1029" timestamp="1621760239734" />
     <state x="743" y="300" width="432" height="484" key="FileChooserDialogImpl/0.27.1920.1028@0.27.1920.1028" timestamp="1617700004765" />
-    <state width="1876" height="272" key="GridCell.Tab.0.bottom" timestamp="1621787923495">
+    <state width="1876" height="271" key="GridCell.Tab.0.bottom" timestamp="1622017839278">
+      <screen x="0" y="27" width="1920" height="1028" />
+    </state>
+    <state width="1876" height="336" key="GridCell.Tab.0.bottom/0.26.1920.1029@0.26.1920.1029" timestamp="1621788401121" />
+    <state width="1876" height="271" key="GridCell.Tab.0.bottom/0.27.1920.1028@0.27.1920.1028" timestamp="1622017839278" />
+    <state width="1876" height="271" key="GridCell.Tab.0.center" timestamp="1622017839278">
+      <screen x="0" y="27" width="1920" height="1028" />
+    </state>
+    <state width="1876" height="336" key="GridCell.Tab.0.center/0.26.1920.1029@0.26.1920.1029" timestamp="1621788401121" />
+    <state width="1876" height="271" key="GridCell.Tab.0.center/0.27.1920.1028@0.27.1920.1028" timestamp="1622017839278" />
+    <state width="1876" height="271" key="GridCell.Tab.0.left" timestamp="1622017839278">
+      <screen x="0" y="27" width="1920" height="1028" />
+    </state>
+    <state width="1876" height="336" key="GridCell.Tab.0.left/0.26.1920.1029@0.26.1920.1029" timestamp="1621788401121" />
+    <state width="1876" height="271" key="GridCell.Tab.0.left/0.27.1920.1028@0.27.1920.1028" timestamp="1622017839278" />
+    <state width="1876" height="271" key="GridCell.Tab.0.right" timestamp="1622017839278">
+      <screen x="0" y="27" width="1920" height="1028" />
+    </state>
+    <state width="1876" height="336" key="GridCell.Tab.0.right/0.26.1920.1029@0.26.1920.1029" timestamp="1621788401121" />
+    <state width="1876" height="271" key="GridCell.Tab.0.right/0.27.1920.1028@0.27.1920.1028" timestamp="1622017839278" />
+    <state width="1876" height="336" key="GridCell.Tab.1.bottom" timestamp="1621788401122">
       <screen x="0" y="26" width="1920" height="1029" />
     </state>
-    <state width="1876" height="272" key="GridCell.Tab.0.bottom/0.26.1920.1029@0.26.1920.1029" timestamp="1621787923495" />
-    <state width="1876" height="272" key="GridCell.Tab.0.center" timestamp="1621787923495">
+    <state width="1876" height="336" key="GridCell.Tab.1.bottom/0.26.1920.1029@0.26.1920.1029" timestamp="1621788401122" />
+    <state width="1876" height="336" key="GridCell.Tab.1.center" timestamp="1621788401122">
       <screen x="0" y="26" width="1920" height="1029" />
     </state>
-    <state width="1876" height="272" key="GridCell.Tab.0.center/0.26.1920.1029@0.26.1920.1029" timestamp="1621787923495" />
-    <state width="1876" height="272" key="GridCell.Tab.0.left" timestamp="1621787923495">
+    <state width="1876" height="336" key="GridCell.Tab.1.center/0.26.1920.1029@0.26.1920.1029" timestamp="1621788401122" />
+    <state width="1876" height="336" key="GridCell.Tab.1.left" timestamp="1621788401122">
       <screen x="0" y="26" width="1920" height="1029" />
     </state>
-    <state width="1876" height="272" key="GridCell.Tab.0.left/0.26.1920.1029@0.26.1920.1029" timestamp="1621787923495" />
-    <state width="1876" height="272" key="GridCell.Tab.0.right" timestamp="1621787923495">
+    <state width="1876" height="336" key="GridCell.Tab.1.left/0.26.1920.1029@0.26.1920.1029" timestamp="1621788401122" />
+    <state width="1876" height="336" key="GridCell.Tab.1.right" timestamp="1621788401122">
       <screen x="0" y="26" width="1920" height="1029" />
     </state>
-    <state width="1876" height="272" key="GridCell.Tab.0.right/0.26.1920.1029@0.26.1920.1029" timestamp="1621787923495" />
-    <state width="1876" height="336" key="GridCell.Tab.1.bottom" timestamp="1621782636211">
-      <screen x="0" y="26" width="1920" height="1029" />
-    </state>
-    <state width="1876" height="336" key="GridCell.Tab.1.bottom/0.26.1920.1029@0.26.1920.1029" timestamp="1621782636211" />
-    <state width="1876" height="336" key="GridCell.Tab.1.center" timestamp="1621782636211">
-      <screen x="0" y="26" width="1920" height="1029" />
-    </state>
-    <state width="1876" height="336" key="GridCell.Tab.1.center/0.26.1920.1029@0.26.1920.1029" timestamp="1621782636211" />
-    <state width="1876" height="336" key="GridCell.Tab.1.left" timestamp="1621782636211">
-      <screen x="0" y="26" width="1920" height="1029" />
-    </state>
-    <state width="1876" height="336" key="GridCell.Tab.1.left/0.26.1920.1029@0.26.1920.1029" timestamp="1621782636210" />
-    <state width="1876" height="336" key="GridCell.Tab.1.right" timestamp="1621782636211">
-      <screen x="0" y="26" width="1920" height="1029" />
-    </state>
-    <state width="1876" height="336" key="GridCell.Tab.1.right/0.26.1920.1029@0.26.1920.1029" timestamp="1621782636211" />
+    <state width="1876" height="336" key="GridCell.Tab.1.right/0.26.1920.1029@0.26.1920.1029" timestamp="1621788401122" />
     <state x="456" y="177" key="SettingsEditor" timestamp="1621762143977">
       <screen x="0" y="26" width="1920" height="1029" />
     </state>
     <state x="456" y="177" key="SettingsEditor/0.26.1920.1029@0.26.1920.1029" timestamp="1621762143977" />
-    <state x="759" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1621760486994">
+    <state x="555" y="278" width="808" height="527" key="Vcs.Push.Dialog.v2" timestamp="1621788191839">
       <screen x="0" y="26" width="1920" height="1029" />
     </state>
+    <state x="555" y="278" width="808" height="527" key="Vcs.Push.Dialog.v2/0.26.1920.1029@0.26.1920.1029" timestamp="1621788191839" />
+    <state x="759" y="458" width="400" height="168" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1622014162847">
+      <screen x="0" y="27" width="1920" height="1028" />
+    </state>
     <state x="759" y="457" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.26.1920.1029@0.26.1920.1029" timestamp="1621760486994" />
-    <state x="759" y="458" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.27.1920.1028@0.27.1920.1028" timestamp="1617699792557" />
+    <state x="759" y="458" width="400" height="168" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.27.1920.1028@0.27.1920.1028" timestamp="1622014162847" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/ex2/tests_to_be_ran_separately.cpp</url>
-          <line>98</line>
-          <option name="timeStamp" value="4" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/ex2/tests_to_be_ran_separately.cpp</url>
-          <line>169</line>
-          <option name="timeStamp" value="6" />
+          <url>file://$PROJECT_DIR$/ex2/uthreads.cpp</url>
+          <line>606</line>
+          <option name="timeStamp" value="11" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

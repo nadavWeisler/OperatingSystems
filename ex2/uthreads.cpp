@@ -48,11 +48,27 @@ address_t translate_address(address_t addr)
 
 #endif
 
+/*
+ * Error type enum
+ */
 enum ErrorType {
     systemError,
     threadLibrary
 } typedef ErrorType;
 
+void raise_error(ErrorType type, const char *errorMsg) {
+    const char *startMsg = "%s";
+    if (type == ErrorType::systemError) {
+        startMsg = "systemError error: %s";
+    } else if (type == ErrorType::threadLibrary) {
+        startMsg = "thread library error: %s";
+    }
+    fprintf(stderr, startMsg, errorMsg);
+}
+
+/*
+ * Return value enum
+ */
 enum ReturnValue {
     failure = -1,
     success = 0
@@ -87,6 +103,11 @@ struct Thread {
     char stack[STACK_SIZE]{};
     bool blocked_by_mutex;
 
+    /**
+     * Struct constructor
+     * @param ID    Thread ID
+     * @param f     Memory address
+     */
     Thread(int ID, void (*f)()) : ID(ID), quantum(0), state(ThreadState::ready), env(), blocked_by_mutex(false) {
         if (ID == 0) // main thread
         {
@@ -99,7 +120,7 @@ struct Thread {
         (env->__jmpbuf)[JB_SP] = translate_address(sp);
         (env->__jmpbuf)[JB_PC] = translate_address(pc);
         if (sigemptyset(&env->__saved_mask)) {
-            fprintf(stderr, "Error");//todo
+            fprintf(stderr, "systemError error: %s", "blocking failure");
             exit(-1);
         }
     }
@@ -147,10 +168,7 @@ public:
         for (auto &thread : threads) {
             thread = nullptr;
         }
-        Thread *main = new Thread(0, nullptr);
-        if (!main) {
-            // todo exit
-        }
+        auto *main = new Thread(0, nullptr);
         main->state = ThreadState::running;
         threads[0] = main; // check for point fichs
         this->thread_count++;
@@ -194,30 +212,14 @@ public:
         manager->manage_ready();
     }
 
-    /*
- * Raise error msg
- */
-    void raise_error(ErrorType type, const char *errorMsg) {
-        const char *startMsg = "%s";
-        if (type == ErrorType::systemError) {
-            startMsg = "systemError error: %s";
-        } else if (type == ErrorType::threadLibrary) {
-            startMsg = "thread library error: %s";
-        }
-        fprintf(stderr, startMsg, errorMsg);
-    }
-
     /**
      * @brief       Init thread
      * @param id    Thread ID
      * @param f     Address
      * @return      0 if success, -1 otherwise
      */
-    int init_thread(int id, void (*f)(void)) {
-        Thread *newThread = new Thread(id, f);
-        if (!newThread) {
-            // todo exit
-        }
+    int init_thread(int id, void (*f)()) {
+        auto *newThread = new Thread(id, f);
         this->thread_count++;
         this->ready_threads.push_back(id);
         this->threads[id] = newThread;
@@ -228,7 +230,7 @@ public:
      * @brief   Get thread count
      * @return  Threads count
      */
-    int get_thread_count() {
+    int get_thread_count() const {
         return this->thread_count;
     }
 
@@ -251,7 +253,7 @@ public:
      */
     void manage_ready() {
         if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) {
-            this->raise_error(ErrorType::systemError, "masking failed");
+            raise_error(ErrorType::systemError, "masking failed");
             this->clean_exit();
         }
         if (this->threads[this->running_id]->state == ThreadState::running) // if running is blocked
@@ -263,7 +265,7 @@ public:
         if (sigsetjmp(this->threads[this->running_id]->env, 1)) // saves the current thread env
         {
             if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) {
-                this->raise_error(ErrorType::systemError, "masking failed");
+                raise_error(ErrorType::systemError, "masking failed");
                 this->clean_exit();
             }
             return; // todo check forum
@@ -279,7 +281,7 @@ public:
         this->total_quantum++;
         this->threads[this->running_id]->state = running;
         if (sigprocmask(SIG_UNBLOCK, &this->mask, nullptr) == -1) {
-            this->raise_error(ErrorType::systemError, "masking failed");
+            raise_error(ErrorType::systemError, "masking failed");
             this->clean_exit();
         }
         this->time();
@@ -292,8 +294,8 @@ public:
 
         bool mutex_locked = this->threads[tid]->blocked_by_mutex;
 
-        while(mutex_locked) {
-            if(this->unlock_mutex(tid) == ReturnValue::failure) {
+        while (mutex_locked) {
+            if (this->unlock_mutex(tid) == ReturnValue::failure) {
                 this->ready_threads.push_back(tid);
                 tid = this->ready_threads.front();
                 this->ready_threads.pop_front();
@@ -315,8 +317,8 @@ public:
     }
 
     bool id_exist(int id) {
-        for (int i = 0; i < MAX_THREAD_NUM; i++) {
-            if (this->threads[i] != nullptr && this->threads[i]->ID == id) {
+        for (auto & thread : this->threads) {
+            if (thread != nullptr && thread->ID == id) {
                 return true;
             }
         }
@@ -345,13 +347,12 @@ public:
         if (this->mutex.state == MutexState::unlocked) {
             return ReturnValue::failure;
         }
-        if(tid != this->mutex.locking_thread_id) {
-            return ReturnValue::success;
+        if (tid != this->mutex.locking_thread_id) {
+            return ReturnValue::failure;
         }
         this->mutex.state = MutexState::unlocked;
         this->mutex.locking_thread_id = -1;
-        if(!this->mutex.block_threads.empty())
-        {
+        if (!this->mutex.block_threads.empty()) {
             int new_tid = this->mutex.block_threads.front();
             this->mutex.block_threads.pop_front();
             this->mutex.locking_thread_id = new_tid;
@@ -377,7 +378,7 @@ public:
      * @brief   Get all threads quantum
      * @return  All threads quantum
      */
-    int get_quantum_usecs() {
+    int get_quantum_usecs() const {
         return this->total_quantum;
     }
 
@@ -391,14 +392,6 @@ public:
     }
 
     /**
-     * @brief   Get mutex reference
-     * @return  Mutex
-     */
-    Mutex &get_mutex() {
-        return this->mutex;
-    }
-
-    /**
      * @brief   Get running thread ID
      * @return  Running thread ID
      */
@@ -406,7 +399,7 @@ public:
         return this->running_id;
     }
 
-    bool is_main_thread(int tid) {
+    static bool is_main_thread(int tid) {
         return tid == 0;
     }
 
@@ -416,8 +409,8 @@ public:
      * @return      0 if success, -1 otherwise
      */
     int block_thread(int tid) {
-        if (this->is_main_thread(tid)) {
-            this->raise_error(ErrorType::threadLibrary, "attempting to block the main thread");
+        if (ThreadManager::is_main_thread(tid)) {
+            raise_error(ErrorType::threadLibrary, "attempting to block the main thread");
             return ReturnValue::failure;
         }
         if (this->threads[tid]->state == ThreadState::blocked) {
@@ -454,7 +447,7 @@ public:
         this->timer.it_interval.tv_sec = 0;
         this->timer.it_interval.tv_usec = 0;
         if (setitimer(ITIMER_VIRTUAL, &this->timer, nullptr)) {
-            this->raise_error(ErrorType::systemError, "timer error");
+            raise_error(ErrorType::systemError, "timer error");
             clean_exit();
             //exit(1);
         }
@@ -468,14 +461,19 @@ public:
             this->main_exit();
         }
         if (this->mutex.locking_thread_id == tid) {
-            if(this->unlock_mutex(tid) == ReturnValue::failure)
-            {
+            if (this->unlock_mutex(tid) == ReturnValue::failure) {
                 return ReturnValue::failure;
             }
         }
+        if (this->threads[tid]->blocked_by_mutex) {
+            this->mutex.block_threads.erase(
+                    std::remove(this->mutex.block_threads.begin(), this->mutex.block_threads.end(), tid),
+                    this->mutex.block_threads.end());
+            this->threads[tid]->blocked_by_mutex = false;
+        }
         if (this->running_id == tid) {
             this->threads[this->running_id]->state = ThreadState::terminated;
-            this->manage_ready(); // check if okay, if not add state
+            this->manage_ready();
         }
         this->ready_threads.erase(
                 std::remove(this->ready_threads.begin(), this->ready_threads.end(), tid),
@@ -504,9 +502,9 @@ public:
      */
     int clean_exit() {
         // todo free memory
-        for (int i = 0; i < MAX_THREAD_NUM; i++) {
-            delete this->threads[i];
-            this->threads[i] = nullptr;
+        for (auto & thread : this->threads) {
+            delete thread;
+            thread = nullptr;
         }
         free(this);
         exit(-1);
@@ -517,8 +515,8 @@ public:
     */
     int main_exit() {
         // todo free memory
-        for (int i = 0; i < MAX_THREAD_NUM; i++) {
-            this->threads[i] = nullptr;
+        for (auto & thread : this->threads) {
+            thread = nullptr;
         }
         free(this);
         exit(0);
@@ -539,12 +537,12 @@ ThreadManager *ThreadManager::manager;
 */
 int uthread_init(int quantum_usecs) {
     if (quantum_usecs < 0) {
-        ThreadManager::manager->raise_error(ErrorType::threadLibrary, "invalid input");
+        raise_error(ErrorType::threadLibrary, "invalid input");
         return ReturnValue::failure;
     }
     ThreadManager::manager = new ThreadManager(quantum_usecs); // not sure if memory should be allocated
     if (!ThreadManager::manager) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "memory allocation failed");
+        raise_error(ErrorType::systemError, "memory allocation failed");
         return ReturnValue::failure;
     }
     return ReturnValue::success;
@@ -560,25 +558,25 @@ int uthread_init(int quantum_usecs) {
  * Return value: On success, return the ID of the created thread.
  * On failure, return -1.
 */
-int uthread_spawn(void (*f)(void)) {
+int uthread_spawn(void (*f)()) {
     if (ThreadManager::manager->get_thread_count() > MAX_THREAD_NUM) {
-        ThreadManager::manager->raise_error(ErrorType::threadLibrary, "reached maximum number of threads");
+        raise_error(ErrorType::threadLibrary, "reached maximum number of threads");
         return ReturnValue::failure;
     }
     if (!f) {
-        ThreadManager::manager->raise_error(ErrorType::threadLibrary, "invalid input");
+        raise_error(ErrorType::threadLibrary, "invalid input");
         return ReturnValue::failure;
     }
     if (!ThreadManager::manager->block_signals()) // block the singls
     {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     int id = ThreadManager::manager->get_new_id();
     int retVal = ThreadManager::manager->init_thread(id, f);
     if (!ThreadManager::manager->unblock_signals()) // unblock the singls
     {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     return retVal;
@@ -597,18 +595,18 @@ int uthread_spawn(void (*f)(void)) {
 */
 int uthread_terminate(int tid) {
     if (!ThreadManager::manager->id_exist(tid)) {
-        ThreadManager::manager->raise_error(ErrorType::threadLibrary, "thread doesn't exist");
+        raise_error(ErrorType::threadLibrary, "thread doesn't exist");
         return ReturnValue::failure;
     }
     if (!ThreadManager::manager->block_signals()) // block the singls
     {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     int retVal = ThreadManager::manager->terminate(tid);
     if (!ThreadManager::manager->unblock_signals()) // unblock the singls
     {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     return retVal;
@@ -625,18 +623,18 @@ int uthread_terminate(int tid) {
 */
 int uthread_block(int tid) {
     if (!ThreadManager::manager->id_exist(tid)) {
-        ThreadManager::manager->raise_error(ErrorType::threadLibrary, "thread doesn't exist");
+        raise_error(ErrorType::threadLibrary, "thread doesn't exist");
         return ReturnValue::failure;
     }
     if (!ThreadManager::manager->block_signals()) // block the singls
     {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     int retValue = ThreadManager::manager->block_thread(tid);
     if (!ThreadManager::manager->unblock_signals()) // unblock the singls
     {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     return retValue;
@@ -651,18 +649,18 @@ int uthread_block(int tid) {
 */
 int uthread_resume(int tid) {
     if (!ThreadManager::manager->id_exist(tid)) {
-        ThreadManager::manager->raise_error(ErrorType::threadLibrary, "thread doesn't exist");
+        raise_error(ErrorType::threadLibrary, "thread doesn't exist");
         return ReturnValue::failure;
     }
     if (!ThreadManager::manager->block_signals()) // block the singls
     {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     ThreadManager::manager->resume_thread(tid);
     if (!ThreadManager::manager->unblock_signals()) // unblock the singls
     {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     return ReturnValue::success;
@@ -679,13 +677,12 @@ int uthread_resume(int tid) {
 */
 int uthread_mutex_lock() {
     if (!ThreadManager::manager->block_signals()) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
-    fprintf(stdout, "LockingID: %d\n", ThreadManager::manager->get_running_id());
     int retVal = ThreadManager::manager->lock_mutex(ThreadManager::manager->get_running_id());
     if (!ThreadManager::manager->unblock_signals()) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     return retVal;
@@ -700,12 +697,12 @@ int uthread_mutex_lock() {
 */
 int uthread_mutex_unlock() {
     if (!ThreadManager::manager->block_signals()) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     int retVal = ThreadManager::manager->unlock_mutex(ThreadManager::manager->get_running_id());
     if (!ThreadManager::manager->unblock_signals()) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     return retVal;
@@ -717,13 +714,13 @@ int uthread_mutex_unlock() {
 */
 int uthread_get_tid() {
     if (!ThreadManager::manager->block_signals()) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     int retVal = ThreadManager::manager->get_running_id();
     if (!ThreadManager::manager->unblock_signals()) // unblock the singls
     {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     return retVal;
@@ -739,12 +736,12 @@ int uthread_get_tid() {
 */
 int uthread_get_total_quantums() {
     if (!ThreadManager::manager->block_signals()) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     int retValue = ThreadManager::manager->get_quantum_usecs();
     if (!ThreadManager::manager->unblock_signals()) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     return retValue;
@@ -762,16 +759,16 @@ int uthread_get_total_quantums() {
 */
 int uthread_get_quantums(int tid) {
     if (!ThreadManager::manager->valid_id(tid)) {
-        ThreadManager::manager->raise_error(ErrorType::threadLibrary, "invalid input");
+        raise_error(ErrorType::threadLibrary, "invalid input");
         return ReturnValue::failure;
     }
     if (!ThreadManager::manager->block_signals()) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     int retVal = ThreadManager::manager->get_thread_quantum(tid);
     if (!ThreadManager::manager->unblock_signals()) {
-        ThreadManager::manager->raise_error(ErrorType::systemError, "masking failed");
+        raise_error(ErrorType::systemError, "masking failed");
         ThreadManager::manager->clean_exit();
     }
     return retVal;
