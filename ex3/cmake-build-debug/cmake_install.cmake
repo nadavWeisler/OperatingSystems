@@ -1,4 +1,4 @@
-# Install script for directory: /mnt/c/Users/t-nweisler/Desktop/else/Tutorials/OperatingSystems/ex3
+# Install script for directory: /cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex3
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -45,5 +45,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/mnt/c/Users/t-nweisler/Desktop/else/Tutorials/OperatingSystems/ex3/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex3/cmake-build-debug/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

@@ -15,10 +15,7 @@ This warning is for project developers.  Use -Wno-dev to suppress it.
 -- Generating done
 -- Build files have been written to: /cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex2/cmake-build-debug/googletest-download
 [ 11%] Performing update step for 'googletest'
-From https://github.com/google/googletest
-   9741c422..a3460d1a  master     -> origin/master
-First, rewinding head to replay your work on top of it...
-Fast-forwarded master to origin/master.
+Current branch master is up to date.
 [ 22%] No configure step for 'googletest'
 [ 33%] No build step for 'googletest'
 [ 44%] No install step for 'googletest'

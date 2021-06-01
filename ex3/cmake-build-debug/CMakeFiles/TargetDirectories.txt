@@ -1,3 +1,3 @@
-/mnt/c/Users/t-nweisler/Desktop/else/Tutorials/OperatingSystems/ex3/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/mnt/c/Users/t-nweisler/Desktop/else/Tutorials/OperatingSystems/ex3/cmake-build-debug/CMakeFiles/edit_cache.dir
-/mnt/c/Users/t-nweisler/Desktop/else/Tutorials/OperatingSystems/ex3/cmake-build-debug/CMakeFiles/ex3.dir
+/cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex3/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex3/cmake-build-debug/CMakeFiles/edit_cache.dir
+/cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex3/cmake-build-debug/CMakeFiles/ex3.dir

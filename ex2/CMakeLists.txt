@@ -40,7 +40,7 @@ endif()
 
 #######################################
 
-add_executable(theTests tests_to_be_ran_separately.cpp uthreads.cpp)
+add_executable(theTests tests_to_be_ran_separately.cpp uthreads.cpp ../ex3/MapReduceClient.cpp ../ex3/MapReduceFramework.cpp)
 target_include_directories(theTests PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../)
 target_link_libraries(theTests PRIVATE gtest_main)
 set_property(TARGET theTests PROPERTY CXX_STANDARD 11)
