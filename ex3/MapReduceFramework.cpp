@@ -2,7 +2,34 @@
 // Created by weisler on 01/06/2021.
 //
 
+#include <zconf.h>
 #include "MapReduceFramework.h"
+
+using namespace std;
+
+/**
+ * Job contex struct
+ */
+struct JobContex {
+    InputVec input;
+    OutputVec output;
+    IntermediateVec middleware;
+    int percentage;
+    stage_t stage;
+    std::vector<pthread_t> threads;
+    MapReduceClient *client;
+    int multiLevelThread;
+
+    JobContex(InputVec _input, OutputVec _output, MapReduceClient *_client, int levelThread) : input(_input),
+                                                                                               output(_output),
+                                                                                               client(_client),
+                                                                                               multiLevelThread(
+                                                                                                       levelThread),
+                                                                                               threads(levelThread),
+                                                                                               stage(stage_t::UNDEFINED_STAGE),
+                                                                                               percentage(0) {
+    }
+} typedef JobContex;
 
 /**
  * This function produces a (K2*, V2*) pair. It has the following signature:
@@ -17,7 +44,8 @@
  * @param context
  */
 void emit2(K2 *key, V2 *value, void *context) {
-
+    auto job = (JobContex *) context;
+    job->middleware.push_back(std::make_pair(key, value));
 }
 
 /**
@@ -33,13 +61,14 @@ void emit2(K2 *key, V2 *value, void *context) {
  * @param context
  */
 void emit3(K3 *key, V3 *value, void *context) {
-
+    auto job = (JobContex *) context;
+    job->output.push_back(std::make_pair(key, value));
 }
 
-JobHandle startMapReduceJob(const MapReduceClient& client,
-                            const InputVec& inputVec, OutputVec& outputVec,
+JobHandle startMapReduceJob(const MapReduceClient &client,
+                            const InputVec &inputVec, OutputVec &outputVec,
                             int multiThreadLevel) {
-    // Create DB, add to map all the K2 and V2 objects.
+    auto job = JobContex
     // We get V2 from the client Map
     // Sort(K2); (shuffle)
     //K3, V3 = Client.reduce(K2, V2)
@@ -63,7 +92,7 @@ void waitForJob(JobHandle job) {
  * @param job       JobHandle
  * @param state     JobState
  */
-void getJobState(JobHandle job, JobState* state) {
+void getJobState(JobHandle job, JobState *state) {
     //job.state = state;
 }
 
