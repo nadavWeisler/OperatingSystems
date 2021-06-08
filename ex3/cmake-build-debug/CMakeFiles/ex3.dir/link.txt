@@ -1,1 +1,1 @@
-/usr/bin/c++  -g   CMakeFiles/ex3.dir/MapReduceClient.cpp.o CMakeFiles/ex3.dir/MapReduceFramework.cpp.o  -o ex3 
+/usr/bin/c++  -g   CMakeFiles/ex3.dir/MapReduceFramework.cpp.o  -o ex3 

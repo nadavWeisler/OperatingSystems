@@ -82,12 +82,6 @@
 				</MakeCommands>
 			</Target>
 		</Build>
-		<Unit filename="/cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex3/MapReduceClient.cpp">
-			<Option target="ex3"/>
-		</Unit>
-		<Unit filename="/cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex3/MapReduceClient.h">
-			<Option target="ex3"/>
-		</Unit>
 		<Unit filename="/cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex3/MapReduceFramework.cpp">
 			<Option target="ex3"/>
 		</Unit>

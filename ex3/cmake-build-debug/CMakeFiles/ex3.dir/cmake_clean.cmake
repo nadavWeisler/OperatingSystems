@@ -1,5 +1,4 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/ex3.dir/MapReduceClient.cpp.o"
   "CMakeFiles/ex3.dir/MapReduceFramework.cpp.o"
   "ex3"
   "ex3.pdb"
