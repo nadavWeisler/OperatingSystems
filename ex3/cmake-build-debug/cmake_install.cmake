@@ -39,6 +39,7 @@ endif()
 
 if(NOT CMAKE_INSTALL_LOCAL_ONLY)
   # Include the install script for each subdirectory.
+  include("/cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSystems/ex3/cmake-build-debug/mattanTests/cmake_install.cmake")
 
 endif()
 

@@ -100,28 +100,6 @@ install/local/fast: preinstall/fast
 	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
 .PHONY : install/local/fast
 
-# Special rule for the target install
-install: preinstall
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -P cmake_install.cmake
-.PHONY : install
-
-# Special rule for the target install
-install/fast: preinstall/fast
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
-	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -P cmake_install.cmake
-.PHONY : install/fast
-
-# Special rule for the target list_install_components
-list_install_components:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
-.PHONY : list_install_components
-
-# Special rule for the target list_install_components
-list_install_components/fast: list_install_components
-
-.PHONY : list_install_components/fast
-
 # Special rule for the target edit_cache
 edit_cache:
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "No interactive CMake dialog available..."
@@ -143,6 +121,28 @@ rebuild_cache:
 rebuild_cache/fast: rebuild_cache
 
 .PHONY : rebuild_cache/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
+
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+
+.PHONY : list_install_components/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -177,6 +177,19 @@ depend:
 .PHONY : depend
 
 #=============================================================================
+# Target rules for targets named MapReduceFramework
+
+# Build rule for target.
+MapReduceFramework: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 MapReduceFramework
+.PHONY : MapReduceFramework
+
+# fast build rule for target.
+MapReduceFramework/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapReduceFramework.dir/build.make CMakeFiles/MapReduceFramework.dir/build
+.PHONY : MapReduceFramework/fast
+
+#=============================================================================
 # Target rules for targets named mattanTester
 
 # Build rule for target.
@@ -186,7 +199,7 @@ mattanTester: cmake_check_build_system
 
 # fast build rule for target.
 mattanTester/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mattanTester.dir/build.make CMakeFiles/mattanTester.dir/build
+	$(MAKE) $(MAKESILENT) -f mattanTests/CMakeFiles/mattanTester.dir/build.make mattanTests/CMakeFiles/mattanTester.dir/build
 .PHONY : mattanTester/fast
 
 #=============================================================================
@@ -199,7 +212,7 @@ gmock_main: cmake_check_build_system
 
 # fast build rule for target.
 gmock_main/fast:
-	$(MAKE) $(MAKESILENT) -f googletest-build/googlemock/CMakeFiles/gmock_main.dir/build.make googletest-build/googlemock/CMakeFiles/gmock_main.dir/build
+	$(MAKE) $(MAKESILENT) -f mattanTests/googletest-build/googlemock/CMakeFiles/gmock_main.dir/build.make mattanTests/googletest-build/googlemock/CMakeFiles/gmock_main.dir/build
 .PHONY : gmock_main/fast
 
 #=============================================================================
@@ -212,7 +225,7 @@ gmock: cmake_check_build_system
 
 # fast build rule for target.
 gmock/fast:
-	$(MAKE) $(MAKESILENT) -f googletest-build/googlemock/CMakeFiles/gmock.dir/build.make googletest-build/googlemock/CMakeFiles/gmock.dir/build
+	$(MAKE) $(MAKESILENT) -f mattanTests/googletest-build/googlemock/CMakeFiles/gmock.dir/build.make mattanTests/googletest-build/googlemock/CMakeFiles/gmock.dir/build
 .PHONY : gmock/fast
 
 #=============================================================================
@@ -225,7 +238,7 @@ gtest_main: cmake_check_build_system
 
 # fast build rule for target.
 gtest_main/fast:
-	$(MAKE) $(MAKESILENT) -f googletest-build/googletest/CMakeFiles/gtest_main.dir/build.make googletest-build/googletest/CMakeFiles/gtest_main.dir/build
+	$(MAKE) $(MAKESILENT) -f mattanTests/googletest-build/googletest/CMakeFiles/gtest_main.dir/build.make mattanTests/googletest-build/googletest/CMakeFiles/gtest_main.dir/build
 .PHONY : gtest_main/fast
 
 #=============================================================================
@@ -238,8 +251,35 @@ gtest: cmake_check_build_system
 
 # fast build rule for target.
 gtest/fast:
-	$(MAKE) $(MAKESILENT) -f googletest-build/googletest/CMakeFiles/gtest.dir/build.make googletest-build/googletest/CMakeFiles/gtest.dir/build
+	$(MAKE) $(MAKESILENT) -f mattanTests/googletest-build/googletest/CMakeFiles/gtest.dir/build.make mattanTests/googletest-build/googletest/CMakeFiles/gtest.dir/build
 .PHONY : gtest/fast
+
+Barrier.o: Barrier.cpp.o
+
+.PHONY : Barrier.o
+
+# target to build an object file
+Barrier.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapReduceFramework.dir/build.make CMakeFiles/MapReduceFramework.dir/Barrier.cpp.o
+.PHONY : Barrier.cpp.o
+
+Barrier.i: Barrier.cpp.i
+
+.PHONY : Barrier.i
+
+# target to preprocess a source file
+Barrier.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapReduceFramework.dir/build.make CMakeFiles/MapReduceFramework.dir/Barrier.cpp.i
+.PHONY : Barrier.cpp.i
+
+Barrier.s: Barrier.cpp.s
+
+.PHONY : Barrier.s
+
+# target to generate assembly for a file
+Barrier.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapReduceFramework.dir/build.make CMakeFiles/MapReduceFramework.dir/Barrier.cpp.s
+.PHONY : Barrier.cpp.s
 
 MapReduceFramework.o: MapReduceFramework.cpp.o
 
@@ -247,7 +287,7 @@ MapReduceFramework.o: MapReduceFramework.cpp.o
 
 # target to build an object file
 MapReduceFramework.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mattanTester.dir/build.make CMakeFiles/mattanTester.dir/MapReduceFramework.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapReduceFramework.dir/build.make CMakeFiles/MapReduceFramework.dir/MapReduceFramework.cpp.o
 .PHONY : MapReduceFramework.cpp.o
 
 MapReduceFramework.i: MapReduceFramework.cpp.i
@@ -256,7 +296,7 @@ MapReduceFramework.i: MapReduceFramework.cpp.i
 
 # target to preprocess a source file
 MapReduceFramework.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mattanTester.dir/build.make CMakeFiles/mattanTester.dir/MapReduceFramework.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapReduceFramework.dir/build.make CMakeFiles/MapReduceFramework.dir/MapReduceFramework.cpp.i
 .PHONY : MapReduceFramework.cpp.i
 
 MapReduceFramework.s: MapReduceFramework.cpp.s
@@ -265,35 +305,8 @@ MapReduceFramework.s: MapReduceFramework.cpp.s
 
 # target to generate assembly for a file
 MapReduceFramework.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mattanTester.dir/build.make CMakeFiles/mattanTester.dir/MapReduceFramework.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/MapReduceFramework.dir/build.make CMakeFiles/MapReduceFramework.dir/MapReduceFramework.cpp.s
 .PHONY : MapReduceFramework.cpp.s
-
-SampleClient.o: SampleClient.cpp.o
-
-.PHONY : SampleClient.o
-
-# target to build an object file
-SampleClient.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mattanTester.dir/build.make CMakeFiles/mattanTester.dir/SampleClient.cpp.o
-.PHONY : SampleClient.cpp.o
-
-SampleClient.i: SampleClient.cpp.i
-
-.PHONY : SampleClient.i
-
-# target to preprocess a source file
-SampleClient.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mattanTester.dir/build.make CMakeFiles/mattanTester.dir/SampleClient.cpp.i
-.PHONY : SampleClient.cpp.i
-
-SampleClient.s: SampleClient.cpp.s
-
-.PHONY : SampleClient.s
-
-# target to generate assembly for a file
-SampleClient.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/mattanTester.dir/build.make CMakeFiles/mattanTester.dir/SampleClient.cpp.s
-.PHONY : SampleClient.cpp.s
 
 # Help Target
 help:
@@ -307,17 +320,18 @@ help:
 	@echo "... install/strip"
 	@echo "... list_install_components"
 	@echo "... rebuild_cache"
+	@echo "... MapReduceFramework"
 	@echo "... gmock"
 	@echo "... gmock_main"
 	@echo "... gtest"
 	@echo "... gtest_main"
 	@echo "... mattanTester"
+	@echo "... Barrier.o"
+	@echo "... Barrier.i"
+	@echo "... Barrier.s"
 	@echo "... MapReduceFramework.o"
 	@echo "... MapReduceFramework.i"
 	@echo "... MapReduceFramework.s"
-	@echo "... SampleClient.o"
-	@echo "... SampleClient.i"
-	@echo "... SampleClient.s"
 .PHONY : help
 
 
