@@ -10,7 +10,7 @@ using namespace std;
 /**
  * Job contex struct
  */
-struct JobContex {
+struct JobContext {
     InputVec input;
     OutputVec output;
     IntermediateVec middleware;
@@ -19,17 +19,47 @@ struct JobContex {
     std::vector<pthread_t> threads;
     MapReduceClient *client;
     int multiLevelThread;
-
+    std::atomic<size_t> counter;
+    std::atomic<size_t> total;
+    std::atomic<size_t> sCounter;
+    pthread_mutex_t inMutex;
+    pthread_mutex_t rMutex;
+    pthread_mutex_t outMutex;
+    pthread_mutex_t stageMutex;
     JobContex(InputVec _input, OutputVec _output, MapReduceClient *_client, int levelThread) : input(_input),
                                                                                                output(_output),
                                                                                                client(_client),
                                                                                                multiLevelThread(
                                                                                                        levelThread),
                                                                                                threads(levelThread),
-                                                                                               stage(stage_t::UNDEFINED_STAGE),
-                                                                                               percentage(0) {
+                                                                                               percentage(0),
+                                                                                               counter(0),
+                                                                                               total(0),
+                                                                                               sCounter(0),
+                                                                                               inMutex(PTHREAD_MUTEX_INITIALIZER),
+                                                                                               rMutex(PTHREAD_MUTEX_INITIALIZER),
+                                                                                               outMutex(PTHREAD_MUTEX_INITIALIZER),
+
+    {
     }
-} typedef JobContex;
+} typedef JobContext;
+
+
+/**
+ * the obejct given as args when initing a thread
+ * job- pointer to the job
+ * mapped - the queue of mapped objects
+ * mapMutex- the mutex used by this thread
+ *
+ */
+struct MapObject()
+{
+    JobContext* job;
+    std::queue<IntermediatePair> mapped;
+    pthread_mutex_t mapMutex;
+    explicit MapObject(JobContext *job) : job(job), mapMutex(PTHREAD_MUTEX_INITIALIZER) {
+    }
+}
 
 /**
  * This function produces a (K2*, V2*) pair. It has the following signature:
@@ -65,10 +95,69 @@ void emit3(K3 *key, V3 *value, void *context) {
     job->output.push_back(std::make_pair(key, value));
 }
 
+
+/**
+ * maps the input to threads
+ * @param m
+ */
+void startMap(void* mapargs)
+{
+    auto m = (mapObject) mapargs;
+    while (!m->job->input.empty())
+    {
+        if(pthread_mutex_lock(&m->job->inMutex)){ // locking mutex failed
+            // ERROR
+        }
+        auto inPair = m->job->input.back();
+        m->job->input.pop_back();
+        if(pthread_mutex_unlock(&m->job->inMutex)){
+            // ERROR
+        }
+        m->job->client->map(inPair.first, inPair.second, m); // call the clients map
+        mapC->parent->counter++;
+    }
+    if (pthread_mutex_unlock(&m->job->inMutex)){ // unlocking mutex failed
+        // ERROR
+    }
+    if(pthread_mutex_lock(&m->job->stageMutex)){ // switcing stage mutex lock
+        // ERROR
+    }
+    m->job->stage = SHUFFLE_STAGE; //
+    if(pthread_mutex_unlock(&m->job->stageMutex)){
+       //ERROR
+    }
+    reduceThread(mapC->parent);
+    return nullptr;
+
+}
+
+void startShuffel()
+{
+
+}
+
+
 JobHandle startMapReduceJob(const MapReduceClient &client,
                             const InputVec &inputVec, OutputVec &outputVec,
                             int multiThreadLevel) {
-    auto job = JobContex
+    auto job = new JobContex(inputVec, outputVec, client, multiThreadLevel);
+    jop.stage = MAP_STAGE;
+    for (int i = 0; i <multiThreadLevel -1; i++)
+    {
+        if (pthread_create(&job->threads[i], nullptr, &startMap , #########add args))
+        {
+            // error message
+            exit(1);
+        }
+    }
+    // creat last thread and call shuffle
+    if (pthread_create(&job->threads[i], nullptr, &startShuffel , #########add args))
+    {
+        // error message
+        exit(1);
+    }
+    return job;
+
     // We get V2 from the client Map
     // Sort(K2); (shuffle)
     //K3, V3 = Client.reduce(K2, V2)
