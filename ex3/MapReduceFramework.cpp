@@ -15,6 +15,9 @@
 
 using namespace std;
 
+#define EQUALS(A, B) ((!(A < B) && !(B < A)))
+
+
 void raise_error(const char *errorMsg) {
     fprintf(stderr, "system error: %s\n", errorMsg);
     exit(1);
@@ -22,19 +25,24 @@ void raise_error(const char *errorMsg) {
 
 struct MapObject;
 
+bool compareKeys(IntermediatePair x, IntermediatePair y) {
+    return ((*x.first) < (*y.first));
+}
+
 /**
  * Job context struct
  */
 struct JobContext {
     InputVec input;
     OutputVec &output;
-    std::map<K2 *, IntermediateVec> middleware;
+    std::vector<IntermediateVec> middleware;
     int inputSize;
     bool waitCalled;
     stage_t stage;
     std::vector<pthread_t> threads;
     std::vector<MapObject> mapObjects;
-    std::queue<K2*> keys;
+    std::vector<K2 *> keys;
+    std::map<K2 *, int> keysIndexes;
     const MapReduceClient *client;
     std::size_t multiLevelThread;
     std::atomic<size_t> mapReduceCounter;
@@ -46,27 +54,31 @@ struct JobContext {
     pthread_mutex_t reduceMutex;
     pthread_mutex_t outputMutex;
     pthread_mutex_t stageMutex;
+    pthread_mutex_t waitMutex;
 
     JobContext(const InputVec &_input, OutputVec &_output,
                const MapReduceClient *_client, int levelThread) : input(_input),
-                                                            output(_output),
-                                                            middleware(),
-                                                            inputSize(input.size()),
-                                                            waitCalled(false),
-                                                            stage(stage_t::MAP_STAGE),
-                                                            threads(levelThread),
-                                                            mapObjects(),
-                                                            client(_client),
-                                                            multiLevelThread(levelThread),
-                                                            mapReduceCounter(0),
-                                                            totalPairs(0),
-                                                            shuffleCounter(0),
-                                                            reduceBarrier(int(multiLevelThread)),
-                                                            shuffleBarrier(int(multiLevelThread) - 1),
-                                                            inputMutex(PTHREAD_MUTEX_INITIALIZER),
-                                                            reduceMutex(PTHREAD_MUTEX_INITIALIZER),
-                                                            outputMutex(PTHREAD_MUTEX_INITIALIZER),
-                                                            stageMutex(PTHREAD_MUTEX_INITIALIZER) {
+                                                                  output(_output),
+                                                                  middleware(),
+                                                                  inputSize(input.size()),
+                                                                  waitCalled(false),
+                                                                  stage(stage_t::MAP_STAGE),
+                                                                  threads(levelThread),
+                                                                  mapObjects(),
+                                                                  keys(),
+                                                                  keysIndexes(),
+                                                                  client(_client),
+                                                                  multiLevelThread(levelThread),
+                                                                  mapReduceCounter(0),
+                                                                  totalPairs(0),
+                                                                  shuffleCounter(0),
+                                                                  reduceBarrier(int(multiLevelThread)),
+                                                                  shuffleBarrier(int(multiLevelThread) - 1),
+                                                                  inputMutex(PTHREAD_MUTEX_INITIALIZER),
+                                                                  reduceMutex(PTHREAD_MUTEX_INITIALIZER),
+                                                                  outputMutex(PTHREAD_MUTEX_INITIALIZER),
+                                                                  stageMutex(PTHREAD_MUTEX_INITIALIZER),
+                                                                  waitMutex(PTHREAD_MUTEX_INITIALIZER){
         for (std::size_t i = 0; i < multiLevelThread; i++) {
             mapObjects.emplace_back(this);
         }
@@ -77,6 +89,7 @@ struct JobContext {
         pthread_mutex_destroy(&outputMutex);
         pthread_mutex_destroy(&reduceMutex);
         pthread_mutex_destroy(&stageMutex);
+        pthread_mutex_destroy(&waitMutex);
     }
 } typedef JobContext;
 
@@ -89,10 +102,11 @@ struct JobContext {
  */
 struct MapObject {
     JobContext *job;
-    std::queue<IntermediatePair> mapPairs;
+    IntermediateVec mapPairs;
     pthread_mutex_t mapMutex;
 
     explicit MapObject(JobContext *job) : job(job), mapMutex(PTHREAD_MUTEX_INITIALIZER) {}
+
     virtual ~MapObject() {
         pthread_mutex_destroy(&mapMutex);
     }
@@ -134,7 +148,7 @@ void emit2(K2 *key, V2 *value, void *context) {
     auto map = (MapObject *) context;
     lockMutex(&map->mapMutex);
 
-    map->mapPairs.push(std::make_pair(key, value));
+    map->mapPairs.push_back(std::make_pair(key, value));
     map->job->totalPairs++;
 
     unlockMutex(&map->mapMutex);
@@ -169,8 +183,7 @@ void *mapThread(MapObject * mapObject) {
     }
     while (true) {
         lockMutex(&mapObject->job->inputMutex);
-        if (mapObject->job->input.empty())
-        {
+        if (mapObject->job->input.empty()) {
             unlockMutex(&mapObject->job->inputMutex);
             break;
         }
@@ -181,8 +194,21 @@ void *mapThread(MapObject * mapObject) {
         mapObject->job->client->map(inPair.first, inPair.second, mapObject); // call the clients map
         mapObject->job->mapReduceCounter++;
     }
-    //std::sort(mapObject->mapPairs.begin(), mapObject->mapPairs.end());//todo: Not Kosher
+    std::sort(mapObject->mapPairs.begin(), mapObject->mapPairs.end(), compareKeys);
     return nullptr;
+}
+
+/**
+ * Get index of given Key
+ */
+int getKeyIndex(JobContext * job, K2 * key) {
+    map<K2 *, int>::iterator it;
+    for (it = job->keysIndexes.begin(); it != job->keysIndexes.end(); it++) {
+        if (EQUALS(key, it->first)) {
+            return it->second;
+        }
+    }
+    return -1;
 }
 
 /*
@@ -195,74 +221,96 @@ void *reduceThread(JobContext * job) {
     if (job->stage != REDUCE_STAGE) {
         job->stage = REDUCE_STAGE; //Set stage tp shuffle
         job->mapReduceCounter = 0;
-        job->inputSize = job->keys.size();
+        job->inputSize = job->middleware.size();
     }
     unlockMutex(&job->stageMutex);
-    while(true) {
+    while (true) {
         lockMutex(&job->reduceMutex);
-        if (job->keys.empty()){
+
+        if (job->keys.empty()) {
             unlockMutex(&job->reduceMutex);
             break;
         }
-        auto key = job->keys.front();
-        job->keys.pop();
+        K2 *key = job->keys.back();
+        job->keys.pop_back();
         job->mapReduceCounter++;
         unlockMutex(&job->reduceMutex);
-        job->client->reduce(&job->middleware.at(key), job);
+        int i = getKeyIndex(job, key);
+        IntermediateVec *toReduce = &job->middleware[i];
+        job->client->reduce(toReduce, job);
     }
+
     return nullptr;
 }
 
 /**
  * mapObjects the input to threads
- * @param m
  */
 void *startMap(void *mapArgs) {
     auto map = (MapObject *) mapArgs;
     mapThread(map);
-
     map->job->shuffleBarrier.barrier();
-
     lockMutex(&map->job->stageMutex);
-
     map->job->stage = SHUFFLE_STAGE; //Set stage tp shuffle
-
     unlockMutex(&map->job->stageMutex);
-
     reduceThread(map->job);
     return nullptr;
 }
 
-void shuffleThreads(JobContext * job) {
-    for(std::size_t i = 0; i < job->multiLevelThread; i++) {
-        auto map = &job->mapObjects[i];
-        lockMutex(&map->mapMutex);
-        while (!map->mapPairs.empty()) {
-            auto pair = map->mapPairs.front();
-            map->mapPairs.pop();
-            unlockMutex(&map->mapMutex);
-            if(job->middleware.find(pair.first) == job->middleware.end()) {
-                job->keys.push(pair.first);
-                job->middleware[pair.first].emplace_back(pair);
-            } else {
-                job->middleware[pair.first].push_back(pair);
-            }
-            job->shuffleCounter++;
+/**
+ * Check if all vectors in Job is empty
+ */
+bool vectorsIsEmpty(JobContext * job) {
+    for (size_t i = 0; i < job->multiLevelThread; i++) {
+        if (!(job->mapObjects[i].mapPairs.empty())) {
+            return false;
         }
-        unlockMutex(&map->mapMutex);
+    }
+    return true;
+}
+
+/**
+ * Shuffle threads
+ */
+void shuffleThreads(JobContext * job) {
+    int index = 0;
+    while (!vectorsIsEmpty(job)) {
+        K2 *largestKey = nullptr;
+        for (size_t i = 0; i < job->multiLevelThread; i++) {
+            lockMutex(&job->mapObjects[i].mapMutex);
+            if (!job->mapObjects[i].mapPairs.empty()) {
+                if (largestKey == nullptr || (*largestKey) < *(job->mapObjects[i].mapPairs.back().first)) {
+                    largestKey = job->mapObjects[i].mapPairs.back().first;
+                }
+            }
+            unlockMutex(&job->mapObjects[i].mapMutex);
+        }
+        IntermediateVec newVec;
+        for (size_t i = 0; i < job->multiLevelThread; i++) {
+            lockMutex(&job->mapObjects[i].mapMutex);
+            while ((!job->mapObjects[i].mapPairs.empty()) &&
+                   EQUALS((*largestKey), (*(job->mapObjects[i].mapPairs.back().first)))) {
+                newVec.push_back(job->mapObjects[i].mapPairs.back());
+                job->mapObjects[i].mapPairs.pop_back();
+                job->shuffleCounter++;
+            }
+            unlockMutex(&job->mapObjects[i].mapMutex);
+        }
+        job->keys.push_back(largestKey);
+        job->keysIndexes.insert(std::make_pair(largestKey, index));
+        index++;
+        job->middleware.push_back(newVec);
+        largestKey = nullptr;
     }
 }
 
 /**
- *
- * @param inputJob
- * @return
+ * Start first thread (with shuffle)
  */
-void *startMapWithShuffle(void *inputJob) {
-    auto map = (MapObject *) inputJob;
-    //mapThread(&map->job->mapObjects.at(map->job->multiLevelThread - 1));
-    while (map->job->stage == MAP_STAGE)
-    {
+void *startMapWithShuffle(void *inputMap) {
+    auto map = (MapObject *) inputMap;
+    mapThread(&map->job->mapObjects.at(map->job->multiLevelThread - 1));
+    while (map->job->stage == MAP_STAGE && map->job->multiLevelThread > 1) {
         shuffleThreads(map->job);
     }
     shuffleThreads(map->job);
@@ -270,10 +318,12 @@ void *startMapWithShuffle(void *inputJob) {
     return nullptr;
 }
 
-
-JobHandle startMapReduceJob(MapReduceClient *client, const InputVec& inputVec, OutputVec &outputVec,
+/*
+ * Manage MapReduce thread functionality
+ */
+JobHandle startMapReduceJob(const MapReduceClient &client, const InputVec &inputVec, OutputVec &outputVec,
                             int multiThreadLevel) {
-    auto job = new JobContext(inputVec, outputVec, client, multiThreadLevel);
+    auto job = new JobContext(inputVec, outputVec, &client, multiThreadLevel);
     for (size_t i = 0; i < job->multiLevelThread - 1; i++) {
         if (pthread_create(&job->threads[i], nullptr, &startMap, &job->mapObjects[i])) {
             raise_error("Thread creation failed");
@@ -297,17 +347,20 @@ JobHandle startMapReduceJob(MapReduceClient *client, const InputVec& inputVec, O
  */
 void waitForJob(JobHandle job) {
     auto context = (JobContext *) job;
+    lockMutex(&context->waitMutex);
     if (!context->waitCalled) {
-        fprintf(stdout, "wait1\n");
         context->waitCalled = true;
         for (std::size_t i = 0; i < context->multiLevelThread; i++) {
             if (pthread_join(context->threads[i], nullptr)) {
                 raise_error("pthread_join failed");
             }
-            fprintf(stdout, "wait\n");
         }
     }
+    unlockMutex(&context->waitMutex);
+
+    lockMutex(&context->stageMutex);
     context->stage = UNDEFINED_STAGE;
+    unlockMutex(&context->stageMutex);
 }
 
 /**
@@ -317,9 +370,7 @@ void waitForJob(JobHandle job) {
  */
 void getJobState(JobHandle job, JobState *state) {
     auto context = (JobContext *) job;
-
     lockMutex(&context->stageMutex);
-
     state->stage = context->stage;
     if (context->stage == UNDEFINED_STAGE) {
         state->percentage = 0;
@@ -328,7 +379,6 @@ void getJobState(JobHandle job, JobState *state) {
     } else {
         state->percentage = ((float) context->mapReduceCounter / context->inputSize) * 100;
     }
-
     unlockMutex(&context->stageMutex);
 }
 
@@ -346,4 +396,3 @@ void closeJobHandle(JobHandle job) {
     waitForJob(job);
     delete context;
 }
-

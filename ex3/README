@@ -1,17 +1,11 @@
 oriane.louzoun, weisler
 Oriane Louzoun(209081074), Nadav weisler(316493758)
 
-EX: 2
+EX: 3
 
 FILES:
-uthreads.cpp -- static library for multi-threading
+MapReduceFramework.cpp -- static library for multi-threading
+Barrier.cpp -- Barrier given implantation cpp file
+Barrier.h -- Barrier given implantation header file
 Makefile
 README
-
-1) an example for a use of user level threads is a UI where the logice runs on a difrent thread then GUI, this is a good choice for the implimitaion, since the computing of the logic wont disturbed the running of the grapics. 
-2) the main resone to create sperate processses is sucurity, since processses dont share infomation if the user inputs sensetive information (such as passwrods) the rest of the tabs and server arnt aware.
-3) user inputs kill pid - interrupt is sent to the shell process and then sehll send signal to other processes using OS comunication, process recive signal and terminate itsel (if no errors happens)
-4) the difference betwin real time and virtual time, is that virtual time measures the running time of a process, and real time measures times.
-you can use real time when you want to measure somthing that is not realted to the computer itself (like an alarm)
-and you can virtual time to check how long dose it take to run a task (without the time it wasnt running).
-

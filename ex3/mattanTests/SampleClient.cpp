@@ -8,6 +8,7 @@
 
 #include <gtest/gtest.h>
 #include <bits/unique_ptr.h>
+#include <thread>
 
 
 static const int REPEATS = 20;
@@ -113,7 +114,6 @@ public:
 };
 
 TEST(MattanTests, waitAndCloseTest) {
-
     CounterClient client;
     auto s1 = new VString("This string is full of characters");
     auto s2 = new VString("Multithreading is awesome");
@@ -123,7 +123,7 @@ TEST(MattanTests, waitAndCloseTest) {
     client.inputVec.push_back({nullptr, s3});
     JobState state;
     JobState last_state={UNDEFINED_STAGE,0};
-    JobHandle job = startMapReduceJob(&client, client.inputVec, client.outputVec, 3);
+    JobHandle job = startMapReduceJob(client, client.inputVec, client.outputVec, 3);
     getJobState(job, &state);
     waitForJob(job);
 
@@ -140,13 +140,13 @@ TEST(MattanTests, errorMessageTest) {
     client.inputVec.push_back({nullptr, s1});
     client.inputVec.push_back({nullptr, s2});
     client.inputVec.push_back({nullptr, s3});
-    ASSERT_EXIT(startMapReduceJob(&client, client.inputVec, client.outputVec, 20000000),
+    ASSERT_EXIT(startMapReduceJob(client, client.inputVec, client.outputVec, 20000000),
                 ::testing::ExitedWithCode(1),
                 ::testing::MatchesRegex("system error: .*\n")
     ) << "When starting too many threads, thread creation should fail, causing program to exit with code 1 and print an error";
 }
 
-TEST(MattanTests, outputTest) {
+void outputTestFunc(){
     CounterClient client;
     std::vector<std::string> a;
     std::string line;
@@ -167,7 +167,7 @@ TEST(MattanTests, outputTest) {
 
     JobState state;
     JobState last_state = {UNDEFINED_STAGE, 0};
-    JobHandle job = startMapReduceJob(&client, client.inputVec, client.outputVec, 200);
+    JobHandle job = startMapReduceJob(client, client.inputVec, client.outputVec, 200);
     getJobState(job, &state);
     last_state = state;
     while (!(state.stage == REDUCE_STAGE && state.percentage == 100.0)) {
@@ -178,9 +178,296 @@ TEST(MattanTests, outputTest) {
         last_state = state;
         getJobState(job, &state);
     }
-    std::cout << "AFTER" << std::endl;
+
     closeJobHandle(job);
-    std::cout << "AFTER2" << std::endl;
+    std::map<char, int> expectedOutput = {{'0',  13258},
+                                          {'1',  13014},
+                                          {'2',  13241},
+                                          {'3',  13246},
+                                          {'4',  13042},
+                                          {'5',  13479},
+                                          {'6',  13085},
+                                          {'7',  12949},
+                                          {'8',  13168},
+                                          {'9',  13033},
+                                          {'a',  13119},
+                                          {'b',  13078},
+                                          {'c',  13360},
+                                          {'d',  13126},
+                                          {'e',  13055},
+                                          {'f',  13460},
+                                          {'g',  12940},
+                                          {'h',  13231},
+                                          {'i',  13112},
+                                          {'j',  13063},
+                                          {'k',  13232},
+                                          {'l',  13016},
+                                          {'m',  13172},
+                                          {'n',  13161},
+                                          {'o',  12989},
+                                          {'p',  13148},
+                                          {'q',  13148},
+                                          {'r',  13200},
+                                          {'s',  13238},
+                                          {'t',  12964},
+                                          {'u',  13106},
+                                          {'v',  13334},
+                                          {'w',  13039},
+                                          {'x',  13202},
+                                          {'y',  13199},
+                                          {'z',  13010},
+                                          {'A',  13149},
+                                          {'B',  13103},
+                                          {'C',  13305},
+                                          {'D',  13132},
+                                          {'E',  13009},
+                                          {'F',  13217},
+                                          {'G',  13107},
+                                          {'H',  13050},
+                                          {'I',  13394},
+                                          {'J',  13248},
+                                          {'K',  13283},
+                                          {'L',  13129},
+                                          {'M',  13095},
+                                          {'N',  13190},
+                                          {'O',  13426},
+                                          {'P',  13187},
+                                          {'Q',  13223},
+                                          {'R',  13360},
+                                          {'S',  13056},
+                                          {'T',  13249},
+                                          {'U',  13175},
+                                          {'V',  13117},
+                                          {'W',  13244},
+                                          {'X',  13228},
+                                          {'Y',  13023},
+                                          {'Z',  13032},
+                                          {'!',  13352},
+                                          {'"',  13271},
+                                          {'#',  13242},
+                                          {'$',  13176},
+                                          {'%',  13172},
+                                          {'&',  13121},
+                                          {'\'', 13274},
+                                          {'(',  13250},
+                                          {')',  13107},
+                                          {'*',  13157},
+                                          {'+',  13199},
+                                          {',',  13143},
+                                          {'-',  13206},
+                                          {'.',  13191},
+                                          {'/',  13266},
+                                          {':',  13308},
+                                          {';',  13309},
+                                          {'<',  13158},
+                                          {'=',  13345},
+                                          {'>',  13061},
+                                          {'?',  13238},
+                                          {'@',  13130},
+                                          {'[',  13050},
+                                          {'\\', 13152},
+                                          {']',  13123},
+                                          {'^',  13143},
+                                          {'_',  13010},
+                                          {'`',  13226},
+                                          {'{',  13054},
+                                          {'|',  13043},
+                                          {'}',  13164},
+                                          {'~',  13234},
+                                          {' ',  13096}};
+    int i = 0;
+    for (OutputPair &pair: client.outputVec) {
+        fprintf(stdout, "%d\n", i);
+        i++;
+
+        char c = ((const KChar *) pair.first)->c;
+        int count = ((const VCount *) pair.second)->count;
+
+        printf("The character %c appeared %u time%s\n",
+               c, count, count > 1 ? "s" : "");
+        auto iter = expectedOutput.find(c);
+        if(iter != expectedOutput.end())
+        {
+            //element found;
+            if (count!=iter->second) {
+                FAIL() << "Your program reported the value "<< count << " for the key " << c << std::endl
+                       << "the actual value is "<< iter->second << std::endl;
+            } else {
+                expectedOutput.erase(iter);
+            }
+        } else {
+            FAIL() << "The key "<<c<<" with value "<<count<<"Does not exist!" << std::endl;
+        }
+    }
+    if (expectedOutput.size() > 0) {
+        auto iter = expectedOutput.begin();
+        FAIL() << "Your program has missed " << expectedOutput.size() << " letters, the first letter you missed is: " << iter->first << " whose count should be " << iter->second;
+    }
+}
+
+TEST(MattanTests, outputTest) {
+    outputTestFunc();
+}
+
+TEST(MattanTests, outputTestFromTwoDiffrentThreads) {
+    std::thread thread1(outputTestFunc);
+    std::thread thread2(outputTestFunc);
+    thread1.join();
+    thread2.join();
+}
+
+TEST(MattanTests, outputTestWaitFromTwoThreads) {
+    CounterClient client;
+    std::vector<std::string> a;
+    std::string line;
+    std::ifstream f(RANDOM_STRINGS_PATH);
+    if (f.is_open()) {
+        while (getline(f, line)) {
+            a.push_back(line);
+        }
+        for (std::string &str : a) {
+            auto v = new VString(str);
+            client.inputVec.push_back({nullptr, v});
+        }
+    } else {
+        FAIL() << "(Technical error) Coludn't find strings file at " << RANDOM_STRINGS_PATH << " - maybe you deleted it by mistake?";
+    }
+
+    std::cout << "Starting job" << std::endl;
+
+    JobState state;
+    JobState last_state = {UNDEFINED_STAGE, 0};
+    JobHandle job = startMapReduceJob(client, client.inputVec, client.outputVec, 200);
+    getJobState(job, &state);
+    last_state = state;
+
+    // the framework should be thread safe, both main thread and new thread should wait for job to end, without crashing, and have the output
+    // as expected for both threads (its the same output so if you crash there and passed the previous output test you probably have a problem with your frame work being thread safe
+    std::thread thread([&]()->void{
+        waitForJob(job);
+        std::map<char, int> expectedOutput = {{'0',  13258},
+                                              {'1',  13014},
+                                              {'2',  13241},
+                                              {'3',  13246},
+                                              {'4',  13042},
+                                              {'5',  13479},
+                                              {'6',  13085},
+                                              {'7',  12949},
+                                              {'8',  13168},
+                                              {'9',  13033},
+                                              {'a',  13119},
+                                              {'b',  13078},
+                                              {'c',  13360},
+                                              {'d',  13126},
+                                              {'e',  13055},
+                                              {'f',  13460},
+                                              {'g',  12940},
+                                              {'h',  13231},
+                                              {'i',  13112},
+                                              {'j',  13063},
+                                              {'k',  13232},
+                                              {'l',  13016},
+                                              {'m',  13172},
+                                              {'n',  13161},
+                                              {'o',  12989},
+                                              {'p',  13148},
+                                              {'q',  13148},
+                                              {'r',  13200},
+                                              {'s',  13238},
+                                              {'t',  12964},
+                                              {'u',  13106},
+                                              {'v',  13334},
+                                              {'w',  13039},
+                                              {'x',  13202},
+                                              {'y',  13199},
+                                              {'z',  13010},
+                                              {'A',  13149},
+                                              {'B',  13103},
+                                              {'C',  13305},
+                                              {'D',  13132},
+                                              {'E',  13009},
+                                              {'F',  13217},
+                                              {'G',  13107},
+                                              {'H',  13050},
+                                              {'I',  13394},
+                                              {'J',  13248},
+                                              {'K',  13283},
+                                              {'L',  13129},
+                                              {'M',  13095},
+                                              {'N',  13190},
+                                              {'O',  13426},
+                                              {'P',  13187},
+                                              {'Q',  13223},
+                                              {'R',  13360},
+                                              {'S',  13056},
+                                              {'T',  13249},
+                                              {'U',  13175},
+                                              {'V',  13117},
+                                              {'W',  13244},
+                                              {'X',  13228},
+                                              {'Y',  13023},
+                                              {'Z',  13032},
+                                              {'!',  13352},
+                                              {'"',  13271},
+                                              {'#',  13242},
+                                              {'$',  13176},
+                                              {'%',  13172},
+                                              {'&',  13121},
+                                              {'\'', 13274},
+                                              {'(',  13250},
+                                              {')',  13107},
+                                              {'*',  13157},
+                                              {'+',  13199},
+                                              {',',  13143},
+                                              {'-',  13206},
+                                              {'.',  13191},
+                                              {'/',  13266},
+                                              {':',  13308},
+                                              {';',  13309},
+                                              {'<',  13158},
+                                              {'=',  13345},
+                                              {'>',  13061},
+                                              {'?',  13238},
+                                              {'@',  13130},
+                                              {'[',  13050},
+                                              {'\\', 13152},
+                                              {']',  13123},
+                                              {'^',  13143},
+                                              {'_',  13010},
+                                              {'`',  13226},
+                                              {'{',  13054},
+                                              {'|',  13043},
+                                              {'}',  13164},
+                                              {'~',  13234},
+                                              {' ',  13096}};
+        for (OutputPair &pair: client.outputVec) {
+            char c = ((const KChar *) pair.first)->c;
+            int count = ((const VCount *) pair.second)->count;
+            printf("The character %c appeared %u time%s\n",
+                   c, count, count > 1 ? "s" : "");
+            auto iter = expectedOutput.find(c);
+            if(iter != expectedOutput.end())
+            {
+                //element found;
+                if (count!=iter->second) {
+                    FAIL() << "Your program reported the value "<< count << " for the key " << c << std::endl
+                           << "the actual value is "<< iter->second << std::endl;
+                } else {
+                    expectedOutput.erase(iter);
+                }
+            } else {
+                FAIL() << "The key "<<c<<" with value "<<count<<"Does not exist!" << std::endl;
+            }
+        }
+        if (expectedOutput.size() > 0) {
+            auto iter = expectedOutput.begin();
+            FAIL() << "Your program has missed " << expectedOutput.size() << " letters, the first letter you missed is: " << iter->first << " whose count should be " << iter->second;
+        }
+    });
+
+
+
+    waitForJob(job);
     std::map<char, int> expectedOutput = {{'0',  13258},
                                           {'1',  13014},
                                           {'2',  13241},
@@ -295,14 +582,563 @@ TEST(MattanTests, outputTest) {
             FAIL() << "The key "<<c<<" with value "<<count<<"Does not exist!" << std::endl;
         }
     }
-    std::cout << "AFTER3" << std::endl;
+    if (expectedOutput.size() > 0) {
+        auto iter = expectedOutput.begin();
+        FAIL() << "Your program has missed " << expectedOutput.size() << " letters, the first letter you missed is: " << iter->first << " whose count should be " << iter->second;
+    }
+    thread.join();
+}
+
+TEST(MattanTests, outputTest3Clients) {
+    CounterClient client1;
+    CounterClient client2;
+    CounterClient client3;
+    std::vector<std::string> a;
+    std::string line;
+    std::ifstream f(RANDOM_STRINGS_PATH);
+    if (f.is_open()) {
+        while (getline(f, line)) {
+            a.push_back(line);
+        }
+        for (std::string &str : a) {
+            auto v1 = new VString(str);
+            auto v2 = new VString(str);
+            auto v3 = new VString(str);
+            client1.inputVec.push_back({nullptr, v1});
+            client2.inputVec.push_back({nullptr, v2});
+            client3.inputVec.push_back({nullptr, v3});
+        }
+    } else {
+        FAIL() << "(Technical error) Coludn't find strings file at " << RANDOM_STRINGS_PATH << " - maybe you deleted it by mistake?";
+    }
+
+    std::cout << "Starting job" << std::endl;
+
+    JobState state;
+    JobState last_state = {UNDEFINED_STAGE, 0};
+    JobHandle job1 = startMapReduceJob(client1, client1.inputVec, client1.outputVec, 200);
+    JobHandle job2 = startMapReduceJob(client2, client2.inputVec, client2.outputVec, 200);
+    JobHandle job3 = startMapReduceJob(client3, client3.inputVec, client3.outputVec, 200);
+
+    closeJobHandle(job1);
+    closeJobHandle(job2);
+    closeJobHandle(job3);
+
+    std::map<char, int> expectedOutput = {{'0',  13258},
+                                          {'1',  13014},
+                                          {'2',  13241},
+                                          {'3',  13246},
+                                          {'4',  13042},
+                                          {'5',  13479},
+                                          {'6',  13085},
+                                          {'7',  12949},
+                                          {'8',  13168},
+                                          {'9',  13033},
+                                          {'a',  13119},
+                                          {'b',  13078},
+                                          {'c',  13360},
+                                          {'d',  13126},
+                                          {'e',  13055},
+                                          {'f',  13460},
+                                          {'g',  12940},
+                                          {'h',  13231},
+                                          {'i',  13112},
+                                          {'j',  13063},
+                                          {'k',  13232},
+                                          {'l',  13016},
+                                          {'m',  13172},
+                                          {'n',  13161},
+                                          {'o',  12989},
+                                          {'p',  13148},
+                                          {'q',  13148},
+                                          {'r',  13200},
+                                          {'s',  13238},
+                                          {'t',  12964},
+                                          {'u',  13106},
+                                          {'v',  13334},
+                                          {'w',  13039},
+                                          {'x',  13202},
+                                          {'y',  13199},
+                                          {'z',  13010},
+                                          {'A',  13149},
+                                          {'B',  13103},
+                                          {'C',  13305},
+                                          {'D',  13132},
+                                          {'E',  13009},
+                                          {'F',  13217},
+                                          {'G',  13107},
+                                          {'H',  13050},
+                                          {'I',  13394},
+                                          {'J',  13248},
+                                          {'K',  13283},
+                                          {'L',  13129},
+                                          {'M',  13095},
+                                          {'N',  13190},
+                                          {'O',  13426},
+                                          {'P',  13187},
+                                          {'Q',  13223},
+                                          {'R',  13360},
+                                          {'S',  13056},
+                                          {'T',  13249},
+                                          {'U',  13175},
+                                          {'V',  13117},
+                                          {'W',  13244},
+                                          {'X',  13228},
+                                          {'Y',  13023},
+                                          {'Z',  13032},
+                                          {'!',  13352},
+                                          {'"',  13271},
+                                          {'#',  13242},
+                                          {'$',  13176},
+                                          {'%',  13172},
+                                          {'&',  13121},
+                                          {'\'', 13274},
+                                          {'(',  13250},
+                                          {')',  13107},
+                                          {'*',  13157},
+                                          {'+',  13199},
+                                          {',',  13143},
+                                          {'-',  13206},
+                                          {'.',  13191},
+                                          {'/',  13266},
+                                          {':',  13308},
+                                          {';',  13309},
+                                          {'<',  13158},
+                                          {'=',  13345},
+                                          {'>',  13061},
+                                          {'?',  13238},
+                                          {'@',  13130},
+                                          {'[',  13050},
+                                          {'\\', 13152},
+                                          {']',  13123},
+                                          {'^',  13143},
+                                          {'_',  13010},
+                                          {'`',  13226},
+                                          {'{',  13054},
+                                          {'|',  13043},
+                                          {'}',  13164},
+                                          {'~',  13234},
+                                          {' ',  13096}};
+    for (OutputPair &pair: client1.outputVec) {
+        char c = ((const KChar *) pair.first)->c;
+        int count = ((const VCount *) pair.second)->count;
+        printf("The character %c appeared %u time%s\n",
+               c, count, count > 1 ? "s" : "");
+        auto iter = expectedOutput.find(c);
+        if(iter != expectedOutput.end())
+        {
+            //element found;
+            if (count!=iter->second) {
+                FAIL() << "Your program reported the value "<< count << " for the key " << c << std::endl
+                       << "the actual value is "<< iter->second << std::endl;
+            } else {
+                expectedOutput.erase(iter);
+            }
+        } else {
+            FAIL() << "The key "<<c<<" with value "<<count<<"Does not exist!" << std::endl;
+        }
+    }
+    if (expectedOutput.size() > 0) {
+        auto iter = expectedOutput.begin();
+        FAIL() << "Your program has missed " << expectedOutput.size() << " letters, the first letter you missed is: " << iter->first << " whose count should be " << iter->second;
+    }
+
+    std::cout << "first job done" << std::endl;
+
+    expectedOutput = {{'0',  13258},
+                      {'1',  13014},
+                      {'2',  13241},
+                      {'3',  13246},
+                      {'4',  13042},
+                      {'5',  13479},
+                      {'6',  13085},
+                      {'7',  12949},
+                      {'8',  13168},
+                      {'9',  13033},
+                      {'a',  13119},
+                      {'b',  13078},
+                      {'c',  13360},
+                      {'d',  13126},
+                      {'e',  13055},
+                      {'f',  13460},
+                      {'g',  12940},
+                      {'h',  13231},
+                      {'i',  13112},
+                      {'j',  13063},
+                      {'k',  13232},
+                      {'l',  13016},
+                      {'m',  13172},
+                      {'n',  13161},
+                      {'o',  12989},
+                      {'p',  13148},
+                      {'q',  13148},
+                      {'r',  13200},
+                      {'s',  13238},
+                      {'t',  12964},
+                      {'u',  13106},
+                      {'v',  13334},
+                      {'w',  13039},
+                      {'x',  13202},
+                      {'y',  13199},
+                      {'z',  13010},
+                      {'A',  13149},
+                      {'B',  13103},
+                      {'C',  13305},
+                      {'D',  13132},
+                      {'E',  13009},
+                      {'F',  13217},
+                      {'G',  13107},
+                      {'H',  13050},
+                      {'I',  13394},
+                      {'J',  13248},
+                      {'K',  13283},
+                      {'L',  13129},
+                      {'M',  13095},
+                      {'N',  13190},
+                      {'O',  13426},
+                      {'P',  13187},
+                      {'Q',  13223},
+                      {'R',  13360},
+                      {'S',  13056},
+                      {'T',  13249},
+                      {'U',  13175},
+                      {'V',  13117},
+                      {'W',  13244},
+                      {'X',  13228},
+                      {'Y',  13023},
+                      {'Z',  13032},
+                      {'!',  13352},
+                      {'"',  13271},
+                      {'#',  13242},
+                      {'$',  13176},
+                      {'%',  13172},
+                      {'&',  13121},
+                      {'\'', 13274},
+                      {'(',  13250},
+                      {')',  13107},
+                      {'*',  13157},
+                      {'+',  13199},
+                      {',',  13143},
+                      {'-',  13206},
+                      {'.',  13191},
+                      {'/',  13266},
+                      {':',  13308},
+                      {';',  13309},
+                      {'<',  13158},
+                      {'=',  13345},
+                      {'>',  13061},
+                      {'?',  13238},
+                      {'@',  13130},
+                      {'[',  13050},
+                      {'\\', 13152},
+                      {']',  13123},
+                      {'^',  13143},
+                      {'_',  13010},
+                      {'`',  13226},
+                      {'{',  13054},
+                      {'|',  13043},
+                      {'}',  13164},
+                      {'~',  13234},
+                      {' ',  13096}};
+    for (OutputPair &pair: client2.outputVec) {
+        char c = ((const KChar *) pair.first)->c;
+        int count = ((const VCount *) pair.second)->count;
+        printf("The character %c appeared %u time%s\n",
+               c, count, count > 1 ? "s" : "");
+        auto iter = expectedOutput.find(c);
+        if(iter != expectedOutput.end())
+        {
+            //element found;
+            if (count!=iter->second) {
+                FAIL() << "Your program reported the value "<< count << " for the key " << c << std::endl
+                       << "the actual value is "<< iter->second << std::endl;
+            } else {
+                expectedOutput.erase(iter);
+            }
+        } else {
+            FAIL() << "The key "<<c<<" with value "<<count<<"Does not exist!" << std::endl;
+        }
+    }
+    if (expectedOutput.size() > 0) {
+        auto iter = expectedOutput.begin();
+        FAIL() << "Your program has missed " << expectedOutput.size() << " letters, the first letter you missed is: " << iter->first << " whose count should be " << iter->second;
+    }
+
+    std::cout << "second job done" << std::endl;
+
+    expectedOutput = {{'0',  13258},
+                      {'1',  13014},
+                      {'2',  13241},
+                      {'3',  13246},
+                      {'4',  13042},
+                      {'5',  13479},
+                      {'6',  13085},
+                      {'7',  12949},
+                      {'8',  13168},
+                      {'9',  13033},
+                      {'a',  13119},
+                      {'b',  13078},
+                      {'c',  13360},
+                      {'d',  13126},
+                      {'e',  13055},
+                      {'f',  13460},
+                      {'g',  12940},
+                      {'h',  13231},
+                      {'i',  13112},
+                      {'j',  13063},
+                      {'k',  13232},
+                      {'l',  13016},
+                      {'m',  13172},
+                      {'n',  13161},
+                      {'o',  12989},
+                      {'p',  13148},
+                      {'q',  13148},
+                      {'r',  13200},
+                      {'s',  13238},
+                      {'t',  12964},
+                      {'u',  13106},
+                      {'v',  13334},
+                      {'w',  13039},
+                      {'x',  13202},
+                      {'y',  13199},
+                      {'z',  13010},
+                      {'A',  13149},
+                      {'B',  13103},
+                      {'C',  13305},
+                      {'D',  13132},
+                      {'E',  13009},
+                      {'F',  13217},
+                      {'G',  13107},
+                      {'H',  13050},
+                      {'I',  13394},
+                      {'J',  13248},
+                      {'K',  13283},
+                      {'L',  13129},
+                      {'M',  13095},
+                      {'N',  13190},
+                      {'O',  13426},
+                      {'P',  13187},
+                      {'Q',  13223},
+                      {'R',  13360},
+                      {'S',  13056},
+                      {'T',  13249},
+                      {'U',  13175},
+                      {'V',  13117},
+                      {'W',  13244},
+                      {'X',  13228},
+                      {'Y',  13023},
+                      {'Z',  13032},
+                      {'!',  13352},
+                      {'"',  13271},
+                      {'#',  13242},
+                      {'$',  13176},
+                      {'%',  13172},
+                      {'&',  13121},
+                      {'\'', 13274},
+                      {'(',  13250},
+                      {')',  13107},
+                      {'*',  13157},
+                      {'+',  13199},
+                      {',',  13143},
+                      {'-',  13206},
+                      {'.',  13191},
+                      {'/',  13266},
+                      {':',  13308},
+                      {';',  13309},
+                      {'<',  13158},
+                      {'=',  13345},
+                      {'>',  13061},
+                      {'?',  13238},
+                      {'@',  13130},
+                      {'[',  13050},
+                      {'\\', 13152},
+                      {']',  13123},
+                      {'^',  13143},
+                      {'_',  13010},
+                      {'`',  13226},
+                      {'{',  13054},
+                      {'|',  13043},
+                      {'}',  13164},
+                      {'~',  13234},
+                      {' ',  13096}};
+    for (OutputPair &pair: client3.outputVec) {
+        char c = ((const KChar *) pair.first)->c;
+        int count = ((const VCount *) pair.second)->count;
+        printf("The character %c appeared %u time%s\n",
+               c, count, count > 1 ? "s" : "");
+        auto iter = expectedOutput.find(c);
+        if(iter != expectedOutput.end())
+        {
+            //element found;
+            if (count!=iter->second) {
+                FAIL() << "Your program reported the value "<< count << " for the key " << c << std::endl
+                       << "the actual value is "<< iter->second << std::endl;
+            } else {
+                expectedOutput.erase(iter);
+            }
+        } else {
+            FAIL() << "The key "<<c<<" with value "<<count<<"Does not exist!" << std::endl;
+        }
+    }
     if (expectedOutput.size() > 0) {
         auto iter = expectedOutput.begin();
         FAIL() << "Your program has missed " << expectedOutput.size() << " letters, the first letter you missed is: " << iter->first << " whose count should be " << iter->second;
     }
 }
 
+TEST(MattanTests, outputTestOneThreadOnly) {
+    CounterClient client;
+    std::vector<std::string> a;
+    std::string line;
+    std::ifstream f(RANDOM_STRINGS_PATH);
+    if (f.is_open()) {
+        while (getline(f, line)) {
+            a.push_back(line);
+        }
+        for (std::string &str : a) {
+            auto v = new VString(str);
+            client.inputVec.push_back({nullptr, v});
+        }
+    } else {
+        FAIL() << "(Technical error) Coludn't find strings file at " << RANDOM_STRINGS_PATH << " - maybe you deleted it by mistake?";
+    }
 
+    std::cout << "Starting job" << std::endl;
+
+    JobState state;
+    JobState last_state = {UNDEFINED_STAGE, 0};
+    JobHandle job = startMapReduceJob(client, client.inputVec, client.outputVec, 1);
+    getJobState(job, &state);
+    last_state = state;
+    while (!(state.stage == REDUCE_STAGE && state.percentage == 100.0)) {
+
+        if (last_state.stage != state.stage || last_state.percentage != state.percentage) {
+            printf("stage %d, %f%% \n", state.stage, state.percentage);
+        }
+        last_state = state;
+        getJobState(job, &state);
+    }
+
+    closeJobHandle(job);
+    std::map<char, int> expectedOutput = {{'0',  13258},
+                                          {'1',  13014},
+                                          {'2',  13241},
+                                          {'3',  13246},
+                                          {'4',  13042},
+                                          {'5',  13479},
+                                          {'6',  13085},
+                                          {'7',  12949},
+                                          {'8',  13168},
+                                          {'9',  13033},
+                                          {'a',  13119},
+                                          {'b',  13078},
+                                          {'c',  13360},
+                                          {'d',  13126},
+                                          {'e',  13055},
+                                          {'f',  13460},
+                                          {'g',  12940},
+                                          {'h',  13231},
+                                          {'i',  13112},
+                                          {'j',  13063},
+                                          {'k',  13232},
+                                          {'l',  13016},
+                                          {'m',  13172},
+                                          {'n',  13161},
+                                          {'o',  12989},
+                                          {'p',  13148},
+                                          {'q',  13148},
+                                          {'r',  13200},
+                                          {'s',  13238},
+                                          {'t',  12964},
+                                          {'u',  13106},
+                                          {'v',  13334},
+                                          {'w',  13039},
+                                          {'x',  13202},
+                                          {'y',  13199},
+                                          {'z',  13010},
+                                          {'A',  13149},
+                                          {'B',  13103},
+                                          {'C',  13305},
+                                          {'D',  13132},
+                                          {'E',  13009},
+                                          {'F',  13217},
+                                          {'G',  13107},
+                                          {'H',  13050},
+                                          {'I',  13394},
+                                          {'J',  13248},
+                                          {'K',  13283},
+                                          {'L',  13129},
+                                          {'M',  13095},
+                                          {'N',  13190},
+                                          {'O',  13426},
+                                          {'P',  13187},
+                                          {'Q',  13223},
+                                          {'R',  13360},
+                                          {'S',  13056},
+                                          {'T',  13249},
+                                          {'U',  13175},
+                                          {'V',  13117},
+                                          {'W',  13244},
+                                          {'X',  13228},
+                                          {'Y',  13023},
+                                          {'Z',  13032},
+                                          {'!',  13352},
+                                          {'"',  13271},
+                                          {'#',  13242},
+                                          {'$',  13176},
+                                          {'%',  13172},
+                                          {'&',  13121},
+                                          {'\'', 13274},
+                                          {'(',  13250},
+                                          {')',  13107},
+                                          {'*',  13157},
+                                          {'+',  13199},
+                                          {',',  13143},
+                                          {'-',  13206},
+                                          {'.',  13191},
+                                          {'/',  13266},
+                                          {':',  13308},
+                                          {';',  13309},
+                                          {'<',  13158},
+                                          {'=',  13345},
+                                          {'>',  13061},
+                                          {'?',  13238},
+                                          {'@',  13130},
+                                          {'[',  13050},
+                                          {'\\', 13152},
+                                          {']',  13123},
+                                          {'^',  13143},
+                                          {'_',  13010},
+                                          {'`',  13226},
+                                          {'{',  13054},
+                                          {'|',  13043},
+                                          {'}',  13164},
+                                          {'~',  13234},
+                                          {' ',  13096}};
+    for (OutputPair &pair: client.outputVec) {
+        char c = ((const KChar *) pair.first)->c;
+        int count = ((const VCount *) pair.second)->count;
+        printf("The character %c appeared %u time%s\n",
+               c, count, count > 1 ? "s" : "");
+        auto iter = expectedOutput.find(c);
+        if(iter != expectedOutput.end())
+        {
+            //element found;
+            if (count!=iter->second) {
+                FAIL() << "Your program reported the value "<< count << " for the key " << c << std::endl
+                       << "the actual value is "<< iter->second << std::endl;
+            } else {
+                expectedOutput.erase(iter);
+            }
+        } else {
+            FAIL() << "The key "<<c<<" with value "<<count<<"Does not exist!" << std::endl;
+        }
+    }
+    if (expectedOutput.size() > 0) {
+        auto iter = expectedOutput.begin();
+        FAIL() << "Your program has missed " << expectedOutput.size() << " letters, the first letter you missed is: " << iter->first << " whose count should be " << iter->second;
+    }
+}
 
 TEST(MattanTests, progressTest) {
     for (int i = 0; i < REPEATS; ++i)
@@ -317,7 +1153,7 @@ TEST(MattanTests, progressTest) {
         client.inputVec.push_back({nullptr, s3});
         JobState state;
         JobState last_state={UNDEFINED_STAGE,0};
-        JobHandle job = startMapReduceJob(&client, client.inputVec, client.outputVec, 6);
+        JobHandle job = startMapReduceJob(client, client.inputVec, client.outputVec, 6);
         getJobState(job, &state);
 
         while (state.stage != REDUCE_STAGE || state.percentage != 100.0)
@@ -357,7 +1193,7 @@ TEST(MattanTests, deadlockTest) {
         client.inputVec.push_back({nullptr, s3});
         JobState state;
         JobState last_state={UNDEFINED_STAGE,0};
-        JobHandle job = startMapReduceJob(&client, client.inputVec, client.outputVec, 3);
+        JobHandle job = startMapReduceJob(client, client.inputVec, client.outputVec, 3);
         getJobState(job, &state);
         while (state.stage != REDUCE_STAGE || state.percentage != 100.0)
         {
@@ -369,8 +1205,6 @@ TEST(MattanTests, deadlockTest) {
 }
 
 void randbody(int iterations) {
-
-
     std::default_random_engine generator(time(nullptr));
     std::uniform_int_distribution<int> bernouli(0, 1);
     std::uniform_int_distribution<int> trinary(0, 2);
@@ -428,7 +1262,7 @@ void randbody(int iterations) {
         for (int j = 0; j < activeJobs; ++j) {
 //            std::cout<<"job "<<j<<std::endl;
             auto &client = clients[j];
-            JobHandle handle = startMapReduceJob(&client, client.inputVec, client.outputVec, levels[j]);
+            JobHandle handle = startMapReduceJob(client, client.inputVec, client.outputVec, levels[j]);
             jobs[j] = handle;
         }
         int totalJobs = activeJobs;
@@ -485,3 +1319,12 @@ TEST(MattanTests, randomTest) {
     //randbody(RANDOM_REPEATS);
 
 }
+
+
+
+
+
+
+
+
+
