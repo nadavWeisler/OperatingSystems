@@ -310,8 +310,10 @@ void shuffleThreads(JobContext * job) {
 void *startMapWithShuffle(void *inputMap) {
     auto map = (MapObject *) inputMap;
     mapThread(&map->job->mapObjects.at(map->job->multiLevelThread - 1));
-    while (map->job->stage == MAP_STAGE && map->job->multiLevelThread > 1) {
-        shuffleThreads(map->job);
+    while(true) {
+        if(map->job->stage == SHUFFLE_STAGE || map->job->multiLevelThread == 1) {
+            break;
+        }
     }
     shuffleThreads(map->job);
     reduceThread(map->job);
