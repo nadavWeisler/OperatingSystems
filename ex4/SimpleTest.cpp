@@ -6,6 +6,7 @@
 int main(int argc, char **argv) {
     VMinitialize();
     for (uint64_t i = 0; i < (2 * NUM_FRAMES); ++i) {
+        //fprintf(stdout, "%lld, i = %lld\n", TABLES_DEPTH, i);
         printf("writing to %llu\n", (long long int) i);
         VMwrite(5 * i * PAGE_SIZE, i);
     }

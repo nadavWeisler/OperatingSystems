@@ -76,16 +76,17 @@ CMAKE_BINARY_DIR = /cs/usr/weisler/CLionProjects/OperatingSystems/OperatingSyste
 #=============================================================================
 # Targets provided globally by CMake.
 
-# Special rule for the target rebuild_cache
-rebuild_cache:
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
-	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
-.PHONY : rebuild_cache
+# Special rule for the target install/local
+install/local: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local
 
-# Special rule for the target rebuild_cache
-rebuild_cache/fast: rebuild_cache
-
-.PHONY : rebuild_cache/fast
+# Special rule for the target install/local
+install/local/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing only the local directory..."
+	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -DCMAKE_INSTALL_LOCAL_ONLY=1 -P cmake_install.cmake
+.PHONY : install/local/fast
 
 # Special rule for the target edit_cache
 edit_cache:
@@ -97,6 +98,51 @@ edit_cache:
 edit_cache/fast: edit_cache
 
 .PHONY : edit_cache/fast
+
+# Special rule for the target rebuild_cache
+rebuild_cache:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Running CMake to regenerate build system..."
+	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake --regenerate-during-build -S$(CMAKE_SOURCE_DIR) -B$(CMAKE_BINARY_DIR)
+.PHONY : rebuild_cache
+
+# Special rule for the target rebuild_cache
+rebuild_cache/fast: rebuild_cache
+
+.PHONY : rebuild_cache/fast
+
+# Special rule for the target install/strip
+install/strip: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip
+
+# Special rule for the target install/strip
+install/strip/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Installing the project stripped..."
+	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -DCMAKE_INSTALL_DO_STRIP=1 -P cmake_install.cmake
+.PHONY : install/strip/fast
+
+# Special rule for the target list_install_components
+list_install_components:
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Available install components are: \"Unspecified\""
+.PHONY : list_install_components
+
+# Special rule for the target list_install_components
+list_install_components/fast: list_install_components
+
+.PHONY : list_install_components/fast
+
+# Special rule for the target install
+install: preinstall
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -P cmake_install.cmake
+.PHONY : install
+
+# Special rule for the target install
+install/fast: preinstall/fast
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --cyan "Install the project..."
+	/usr/local/APP/jetbrains/clion/2020.2/bin/cmake/linux/bin/cmake -P cmake_install.cmake
+.PHONY : install/fast
 
 # The main all target
 all: cmake_check_build_system
@@ -131,17 +177,254 @@ depend:
 .PHONY : depend
 
 #=============================================================================
-# Target rules for targets named ex4
+# Target rules for targets named SingleTableVirtualMemory
 
 # Build rule for target.
-ex4: cmake_check_build_system
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ex4
-.PHONY : ex4
+SingleTableVirtualMemory: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 SingleTableVirtualMemory
+.PHONY : SingleTableVirtualMemory
 
 # fast build rule for target.
-ex4/fast:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ex4.dir/build.make CMakeFiles/ex4.dir/build
-.PHONY : ex4/fast
+SingleTableVirtualMemory/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SingleTableVirtualMemory.dir/build.make CMakeFiles/SingleTableVirtualMemory.dir/build
+.PHONY : SingleTableVirtualMemory/fast
+
+#=============================================================================
+# Target rules for targets named TestVirtualMemory
+
+# Build rule for target.
+TestVirtualMemory: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 TestVirtualMemory
+.PHONY : TestVirtualMemory
+
+# fast build rule for target.
+TestVirtualMemory/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TestVirtualMemory.dir/build.make CMakeFiles/TestVirtualMemory.dir/build
+.PHONY : TestVirtualMemory/fast
+
+#=============================================================================
+# Target rules for targets named UnreachableFramesVirtualMemory
+
+# Build rule for target.
+UnreachableFramesVirtualMemory: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 UnreachableFramesVirtualMemory
+.PHONY : UnreachableFramesVirtualMemory
+
+# fast build rule for target.
+UnreachableFramesVirtualMemory/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/UnreachableFramesVirtualMemory.dir/build.make CMakeFiles/UnreachableFramesVirtualMemory.dir/build
+.PHONY : UnreachableFramesVirtualMemory/fast
+
+#=============================================================================
+# Target rules for targets named NoEvictionVirtualMemory
+
+# Build rule for target.
+NoEvictionVirtualMemory: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 NoEvictionVirtualMemory
+.PHONY : NoEvictionVirtualMemory
+
+# fast build rule for target.
+NoEvictionVirtualMemory/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NoEvictionVirtualMemory.dir/build.make CMakeFiles/NoEvictionVirtualMemory.dir/build
+.PHONY : NoEvictionVirtualMemory/fast
+
+#=============================================================================
+# Target rules for targets named VirtualMemory
+
+# Build rule for target.
+VirtualMemory: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 VirtualMemory
+.PHONY : VirtualMemory
+
+# fast build rule for target.
+VirtualMemory/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VirtualMemory.dir/build.make CMakeFiles/VirtualMemory.dir/build
+.PHONY : VirtualMemory/fast
+
+#=============================================================================
+# Target rules for targets named OffsetDifferentThanIndexMemory
+
+# Build rule for target.
+OffsetDifferentThanIndexMemory: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 OffsetDifferentThanIndexMemory
+.PHONY : OffsetDifferentThanIndexMemory
+
+# fast build rule for target.
+OffsetDifferentThanIndexMemory/fast:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/OffsetDifferentThanIndexMemory.dir/build.make CMakeFiles/OffsetDifferentThanIndexMemory.dir/build
+.PHONY : OffsetDifferentThanIndexMemory/fast
+
+#=============================================================================
+# Target rules for targets named ex4Tests_SingleTable
+
+# Build rule for target.
+ex4Tests_SingleTable: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ex4Tests_SingleTable
+.PHONY : ex4Tests_SingleTable
+
+# fast build rule for target.
+ex4Tests_SingleTable/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/ex4Tests_SingleTable.dir/build.make tests/CMakeFiles/ex4Tests_SingleTable.dir/build
+.PHONY : ex4Tests_SingleTable/fast
+
+#=============================================================================
+# Target rules for targets named ex4Tests_OffsetDifferentThanIndex
+
+# Build rule for target.
+ex4Tests_OffsetDifferentThanIndex: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ex4Tests_OffsetDifferentThanIndex
+.PHONY : ex4Tests_OffsetDifferentThanIndex
+
+# fast build rule for target.
+ex4Tests_OffsetDifferentThanIndex/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/ex4Tests_OffsetDifferentThanIndex.dir/build.make tests/CMakeFiles/ex4Tests_OffsetDifferentThanIndex.dir/build
+.PHONY : ex4Tests_OffsetDifferentThanIndex/fast
+
+#=============================================================================
+# Target rules for targets named ex4Tests_NormalConstants
+
+# Build rule for target.
+ex4Tests_NormalConstants: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ex4Tests_NormalConstants
+.PHONY : ex4Tests_NormalConstants
+
+# fast build rule for target.
+ex4Tests_NormalConstants/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/ex4Tests_NormalConstants.dir/build.make tests/CMakeFiles/ex4Tests_NormalConstants.dir/build
+.PHONY : ex4Tests_NormalConstants/fast
+
+#=============================================================================
+# Target rules for targets named ex4Tests_SmallConstants
+
+# Build rule for target.
+ex4Tests_SmallConstants: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ex4Tests_SmallConstants
+.PHONY : ex4Tests_SmallConstants
+
+# fast build rule for target.
+ex4Tests_SmallConstants/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/ex4Tests_SmallConstants.dir/build.make tests/CMakeFiles/ex4Tests_SmallConstants.dir/build
+.PHONY : ex4Tests_SmallConstants/fast
+
+#=============================================================================
+# Target rules for targets named ex4Tests_NoEviction
+
+# Build rule for target.
+ex4Tests_NoEviction: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ex4Tests_NoEviction
+.PHONY : ex4Tests_NoEviction
+
+# fast build rule for target.
+ex4Tests_NoEviction/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/ex4Tests_NoEviction.dir/build.make tests/CMakeFiles/ex4Tests_NoEviction.dir/build
+.PHONY : ex4Tests_NoEviction/fast
+
+#=============================================================================
+# Target rules for targets named ex4Tests_UnreachableFrames
+
+# Build rule for target.
+ex4Tests_UnreachableFrames: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 ex4Tests_UnreachableFrames
+.PHONY : ex4Tests_UnreachableFrames
+
+# fast build rule for target.
+ex4Tests_UnreachableFrames/fast:
+	$(MAKE) $(MAKESILENT) -f tests/CMakeFiles/ex4Tests_UnreachableFrames.dir/build.make tests/CMakeFiles/ex4Tests_UnreachableFrames.dir/build
+.PHONY : ex4Tests_UnreachableFrames/fast
+
+#=============================================================================
+# Target rules for targets named gmock_main
+
+# Build rule for target.
+gmock_main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gmock_main
+.PHONY : gmock_main
+
+# fast build rule for target.
+gmock_main/fast:
+	$(MAKE) $(MAKESILENT) -f tests/googletest-build/googlemock/CMakeFiles/gmock_main.dir/build.make tests/googletest-build/googlemock/CMakeFiles/gmock_main.dir/build
+.PHONY : gmock_main/fast
+
+#=============================================================================
+# Target rules for targets named gmock
+
+# Build rule for target.
+gmock: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gmock
+.PHONY : gmock
+
+# fast build rule for target.
+gmock/fast:
+	$(MAKE) $(MAKESILENT) -f tests/googletest-build/googlemock/CMakeFiles/gmock.dir/build.make tests/googletest-build/googlemock/CMakeFiles/gmock.dir/build
+.PHONY : gmock/fast
+
+#=============================================================================
+# Target rules for targets named gtest_main
+
+# Build rule for target.
+gtest_main: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gtest_main
+.PHONY : gtest_main
+
+# fast build rule for target.
+gtest_main/fast:
+	$(MAKE) $(MAKESILENT) -f tests/googletest-build/googletest/CMakeFiles/gtest_main.dir/build.make tests/googletest-build/googletest/CMakeFiles/gtest_main.dir/build
+.PHONY : gtest_main/fast
+
+#=============================================================================
+# Target rules for targets named gtest
+
+# Build rule for target.
+gtest: cmake_check_build_system
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 gtest
+.PHONY : gtest
+
+# fast build rule for target.
+gtest/fast:
+	$(MAKE) $(MAKESILENT) -f tests/googletest-build/googletest/CMakeFiles/gtest.dir/build.make tests/googletest-build/googletest/CMakeFiles/gtest.dir/build
+.PHONY : gtest/fast
+
+PhysicalMemory.o: PhysicalMemory.cpp.o
+
+.PHONY : PhysicalMemory.o
+
+# target to build an object file
+PhysicalMemory.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SingleTableVirtualMemory.dir/build.make CMakeFiles/SingleTableVirtualMemory.dir/PhysicalMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TestVirtualMemory.dir/build.make CMakeFiles/TestVirtualMemory.dir/PhysicalMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/UnreachableFramesVirtualMemory.dir/build.make CMakeFiles/UnreachableFramesVirtualMemory.dir/PhysicalMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NoEvictionVirtualMemory.dir/build.make CMakeFiles/NoEvictionVirtualMemory.dir/PhysicalMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VirtualMemory.dir/build.make CMakeFiles/VirtualMemory.dir/PhysicalMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/OffsetDifferentThanIndexMemory.dir/build.make CMakeFiles/OffsetDifferentThanIndexMemory.dir/PhysicalMemory.cpp.o
+.PHONY : PhysicalMemory.cpp.o
+
+PhysicalMemory.i: PhysicalMemory.cpp.i
+
+.PHONY : PhysicalMemory.i
+
+# target to preprocess a source file
+PhysicalMemory.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SingleTableVirtualMemory.dir/build.make CMakeFiles/SingleTableVirtualMemory.dir/PhysicalMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TestVirtualMemory.dir/build.make CMakeFiles/TestVirtualMemory.dir/PhysicalMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/UnreachableFramesVirtualMemory.dir/build.make CMakeFiles/UnreachableFramesVirtualMemory.dir/PhysicalMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NoEvictionVirtualMemory.dir/build.make CMakeFiles/NoEvictionVirtualMemory.dir/PhysicalMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VirtualMemory.dir/build.make CMakeFiles/VirtualMemory.dir/PhysicalMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/OffsetDifferentThanIndexMemory.dir/build.make CMakeFiles/OffsetDifferentThanIndexMemory.dir/PhysicalMemory.cpp.i
+.PHONY : PhysicalMemory.cpp.i
+
+PhysicalMemory.s: PhysicalMemory.cpp.s
+
+.PHONY : PhysicalMemory.s
+
+# target to generate assembly for a file
+PhysicalMemory.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SingleTableVirtualMemory.dir/build.make CMakeFiles/SingleTableVirtualMemory.dir/PhysicalMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TestVirtualMemory.dir/build.make CMakeFiles/TestVirtualMemory.dir/PhysicalMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/UnreachableFramesVirtualMemory.dir/build.make CMakeFiles/UnreachableFramesVirtualMemory.dir/PhysicalMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NoEvictionVirtualMemory.dir/build.make CMakeFiles/NoEvictionVirtualMemory.dir/PhysicalMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VirtualMemory.dir/build.make CMakeFiles/VirtualMemory.dir/PhysicalMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/OffsetDifferentThanIndexMemory.dir/build.make CMakeFiles/OffsetDifferentThanIndexMemory.dir/PhysicalMemory.cpp.s
+.PHONY : PhysicalMemory.cpp.s
 
 VirtualMemory.o: VirtualMemory.cpp.o
 
@@ -149,7 +432,12 @@ VirtualMemory.o: VirtualMemory.cpp.o
 
 # target to build an object file
 VirtualMemory.cpp.o:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ex4.dir/build.make CMakeFiles/ex4.dir/VirtualMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SingleTableVirtualMemory.dir/build.make CMakeFiles/SingleTableVirtualMemory.dir/VirtualMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TestVirtualMemory.dir/build.make CMakeFiles/TestVirtualMemory.dir/VirtualMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/UnreachableFramesVirtualMemory.dir/build.make CMakeFiles/UnreachableFramesVirtualMemory.dir/VirtualMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NoEvictionVirtualMemory.dir/build.make CMakeFiles/NoEvictionVirtualMemory.dir/VirtualMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VirtualMemory.dir/build.make CMakeFiles/VirtualMemory.dir/VirtualMemory.cpp.o
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/OffsetDifferentThanIndexMemory.dir/build.make CMakeFiles/OffsetDifferentThanIndexMemory.dir/VirtualMemory.cpp.o
 .PHONY : VirtualMemory.cpp.o
 
 VirtualMemory.i: VirtualMemory.cpp.i
@@ -158,7 +446,12 @@ VirtualMemory.i: VirtualMemory.cpp.i
 
 # target to preprocess a source file
 VirtualMemory.cpp.i:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ex4.dir/build.make CMakeFiles/ex4.dir/VirtualMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SingleTableVirtualMemory.dir/build.make CMakeFiles/SingleTableVirtualMemory.dir/VirtualMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TestVirtualMemory.dir/build.make CMakeFiles/TestVirtualMemory.dir/VirtualMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/UnreachableFramesVirtualMemory.dir/build.make CMakeFiles/UnreachableFramesVirtualMemory.dir/VirtualMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NoEvictionVirtualMemory.dir/build.make CMakeFiles/NoEvictionVirtualMemory.dir/VirtualMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VirtualMemory.dir/build.make CMakeFiles/VirtualMemory.dir/VirtualMemory.cpp.i
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/OffsetDifferentThanIndexMemory.dir/build.make CMakeFiles/OffsetDifferentThanIndexMemory.dir/VirtualMemory.cpp.i
 .PHONY : VirtualMemory.cpp.i
 
 VirtualMemory.s: VirtualMemory.cpp.s
@@ -167,7 +460,12 @@ VirtualMemory.s: VirtualMemory.cpp.s
 
 # target to generate assembly for a file
 VirtualMemory.cpp.s:
-	$(MAKE) $(MAKESILENT) -f CMakeFiles/ex4.dir/build.make CMakeFiles/ex4.dir/VirtualMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/SingleTableVirtualMemory.dir/build.make CMakeFiles/SingleTableVirtualMemory.dir/VirtualMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/TestVirtualMemory.dir/build.make CMakeFiles/TestVirtualMemory.dir/VirtualMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/UnreachableFramesVirtualMemory.dir/build.make CMakeFiles/UnreachableFramesVirtualMemory.dir/VirtualMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/NoEvictionVirtualMemory.dir/build.make CMakeFiles/NoEvictionVirtualMemory.dir/VirtualMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/VirtualMemory.dir/build.make CMakeFiles/VirtualMemory.dir/VirtualMemory.cpp.s
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/OffsetDifferentThanIndexMemory.dir/build.make CMakeFiles/OffsetDifferentThanIndexMemory.dir/VirtualMemory.cpp.s
 .PHONY : VirtualMemory.cpp.s
 
 # Help Target
@@ -177,8 +475,30 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... edit_cache"
+	@echo "... install"
+	@echo "... install/local"
+	@echo "... install/strip"
+	@echo "... list_install_components"
 	@echo "... rebuild_cache"
-	@echo "... ex4"
+	@echo "... NoEvictionVirtualMemory"
+	@echo "... OffsetDifferentThanIndexMemory"
+	@echo "... SingleTableVirtualMemory"
+	@echo "... TestVirtualMemory"
+	@echo "... UnreachableFramesVirtualMemory"
+	@echo "... VirtualMemory"
+	@echo "... ex4Tests_NoEviction"
+	@echo "... ex4Tests_NormalConstants"
+	@echo "... ex4Tests_OffsetDifferentThanIndex"
+	@echo "... ex4Tests_SingleTable"
+	@echo "... ex4Tests_SmallConstants"
+	@echo "... ex4Tests_UnreachableFrames"
+	@echo "... gmock"
+	@echo "... gmock_main"
+	@echo "... gtest"
+	@echo "... gtest_main"
+	@echo "... PhysicalMemory.o"
+	@echo "... PhysicalMemory.i"
+	@echo "... PhysicalMemory.s"
 	@echo "... VirtualMemory.o"
 	@echo "... VirtualMemory.i"
 	@echo "... VirtualMemory.s"

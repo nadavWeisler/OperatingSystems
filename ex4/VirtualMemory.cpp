@@ -1,174 +1,239 @@
 #include "VirtualMemory.h"
 #include "PhysicalMemory.h"
+#include <algorithm>
 
-using namespace std;
+#define ABS(a, b) (std::max(a,b) - std::min(a,b))
+#define OFFSET(virtualAddress) (virtualAddress & (PAGE_SIZE-1))
 
-typedef struct TreeData {
-    word_t maxFrameIndex;
-    word_t swapFrame;
-    uint64_t swapPage;
-    uint64_t swapPAddress;
-    uint64_t freeAddress;
-    uint64_t freePAddress;
-    int max_weight;
-
-} TreeData;
+uint64_t findFreeFrame(uint64_t virtualAddress, word_t forbiddenToEvict);
 
 
-void clearTable(uint64_t frameIndex) {
-    for (uint64_t i = 0; i < PAGE_SIZE; ++i) {
+/**
+ * struct that holds data needed for tree traversing
+ */
+typedef struct Info
+{
+    word_t maxIndex;
+    uint64_t emptyAddress;
+    uint64_t emptyPhysical;
+    word_t furthestFrame;
+    uint64_t furthestPage;
+    uint64_t furthestPhysical;
+    int weights[TABLES_DEPTH];
+    int maxweight;
+} Info;
+
+void UpdateSwap(Info &data, uint64_t currentPage, word_t pyAddress);
+
+
+/**
+ * clears table at index
+ * @param frameIndex table index
+ */
+void clearTable(uint64_t frameIndex)
+{
+    for (uint64_t i = 0; i < PAGE_SIZE; ++i)
+    {
         PMwrite(frameIndex * PAGE_SIZE + i, 0);
     }
 }
-
-void UpdateSwap(TreeData &data, int weights[TABLES_DEPTH], uint64_t currentPage, word_t pyAddress) {
-    int newWeight = 0;
-    for (int  i = 0; i < TABLES_DEPTH; i++)
-    {
-        newWeight += weights[i];
-    }
-    if (newWeight > data.max_weight)
-    {
-        data.max_weight = newWeight;
-        data.swapPage = currentPage;
-        PMread(pyAddress, &data.swapFrame);
-        data.swapPAddress = pyAddress;
-    }
-}
-
 /**
- * runs dfs to find empty frame
- * @param currentAddress - the address for thr root frame (start with 0)
- * @param notEvict the frame that cant be evicted (the root frame)
- * @param depth current depth of the tree
- * @param pAddress the parents address
- * @param page current page
- * @param data struct with data for traversing the tree
+ * Initialize the virtual memory
  */
-void DFS(word_t currentAddress, word_t notEvict, int depth, word_t pAddress, uint64_t page,
-         TreeData &data, int weights[TABLES_DEPTH]) {
-    // if current address is bigger update maxFrameIndex // todo: should break maybe?
-    if (currentAddress > data.maxFrameIndex) {
-        data.maxFrameIndex = currentAddress;
-    }
-    // breaking point for dfs, also updates the swapping info if necessary
-    if (depth == TABLES_DEPTH) {
-        UpdateSwap(data, weights, page, pAddress);
-        return;
-    }
-    word_t subTree; // set sutree for dfs
-    bool allRowsEmpty = true; // if all rows remain empty dont have o go eny deeper.
-    for (uint64_t i = 0; i < PAGE_SIZE; i++) {
-        uint64_t currentPyAddress = currentAddress * PAGE_SIZE + i; // update physical address
-        PMread(currentPyAddress, &subTree); // update subtree (virtual address)
-        // todo using this we should update the weight
-        if (subTree != 0) {
-            if (page % 2 == 0)
-            {
-                weights[depth] = WEIGHT_EVEN;
-            } else
-            {
-                weights[depth] = WEIGHT_ODD;
-            }
-            allRowsEmpty = false; // set all rows empty to false so the dfs will go on
-            // call dfs on child
-            DFS(subTree, notEvict, depth + 1, currentPyAddress,
-                (page << (unsigned  int) OFFSET_WIDTH) + i, data, weights);
-        }
-    }
-    word_t frame;
-    PMread(pAddress, &frame);
-    if (allRowsEmpty && frame != notEvict) {
-        data.freeAddress = currentAddress;
-        data.freePAddress = pAddress;
-    }
-}
-
-uint64_t getNewFrame(word_t notEvict) {
-    TreeData data = {};
-    int weights[TABLES_DEPTH];
-    DFS(0, notEvict, 0, 0, 0, data, weights);
-    //Case 1: do not evict, remove reference
-    if (data.freeAddress != 0) {
-        PMwrite(data.freePAddress, 0); // remove link from parents
-        return data.freeAddress;
-    }
-    //Case 2: Unused frame:
-    if (data.maxFrameIndex < NUM_FRAMES - 1) { // this frame is unused and we can use ut.
-        return data.maxFrameIndex + 1;
-    }
-    if (data.maxFrameIndex >= NUM_FRAMES - 1) { // no frame is unused and we need to evict the chosen frame.
-        // need to find what page to swap.
-        PMevict(data.swapFrame, data.swapPage);
-        PMwrite(data.swapPAddress, 0);
-        return data.swapFrame;
-    }
-}
-
-void VMinitialize() {
+void VMinitialize()
+{
     clearTable(0);
 }
 
 /**
- * trnslates the virtual memory to physical
- * @param virtualAddress
- * @return physical memoery.
+ * splitting page number into tags
+ * @param pageNumber original page number
+ * @param tags array to update tags in
  */
-uint64_t getPhysicalAddress(uint64_t virtualAddress) {
-    uint64_t tags[TABLES_DEPTH]; // create tags
-    uint64_t page = virtualAddress >> OFFSET_WIDTH; // find the page part of the address
-    word_t currentAddress = 0;
-    word_t notEvict = 0;
+void createTags(uint64_t pageNumber, uint64_t *tags)
+{
+
+    for (int i = TABLES_DEPTH - 1; i >= 0; --i)
+    {
+        tags[i] = pageNumber & (PAGE_SIZE - 1);
+        pageNumber >>= OFFSET_WIDTH;
+    }
+}
+
+/**
+ * converts virtual address to physical address
+ * @param virtualAddress virtual address
+ * @return physical address
+ */
+uint64_t getPhysicalAddress(uint64_t virtualAddress)
+{
+    uint64_t tags[TABLES_DEPTH];
+    uint64_t pageNumber = virtualAddress >> OFFSET_WIDTH;
+    createTags(pageNumber, tags);
+    word_t address = 0, forbiddenToEvict = 0;
     uint64_t frame = 0;
-    for (int i = TABLES_DEPTH - 1; i >= 0; i--) {
-        tags[i] = page & (PAGE_SIZE - 1);
-        page >>= OFFSET_WIDTH;
-    }
-    for (int i = 0; i < TABLES_DEPTH; i++) {
-        uint64_t pAddress = currentAddress * PAGE_SIZE + tags[i];
-        PMread(pAddress, &currentAddress); //First translate
-        //address not in ram and need to create, so Find free frame
-        if (currentAddress == 0) {
-            frame = getNewFrame(notEvict); // update frame
-            if (i == TABLES_DEPTH - 1) {
-                PMrestore(frame, page);
-            } else {
-                clearTable(frame);
-            }
-            PMwrite(pAddress, frame);
+
+    for (int i = 0; i < TABLES_DEPTH; ++i)
+    {
+        uint64_t physicalAddress = address * PAGE_SIZE + tags[i];
+        PMread(physicalAddress, &address);
+        if (address == 0)
+        {
+            frame = findFreeFrame(pageNumber, forbiddenToEvict);
+            i != TABLES_DEPTH - 1 ? clearTable(frame) : PMrestore(frame, pageNumber);
+            PMwrite(physicalAddress, frame);
+            address = frame;
+
         }
-        notEvict = currentAddress;
+        forbiddenToEvict = address;
+
+
     }
-    return currentAddress * PAGE_SIZE + (virtualAddress & (PAGE_SIZE - 1));
+    return address * PAGE_SIZE + OFFSET(virtualAddress);;
+
 }
 
-/* reads a word from the given virtual address
- * and puts its content in *value.
- *
- * returns 1 on success.
- * returns 0 on failure (if the address cannot be mapped to a physical
- * address for any reason)
+/**
+ * reads a word from the given virtual address and puts its content in *value.
+ * @param virtualAddress virtual address to read from
+ * @param value word to be updated with read value
+ * @return 1 if succeeded, 0 else
  */
-int VMread(uint64_t virtualAddress, word_t *value) {
-    if (virtualAddress >= VIRTUAL_MEMORY_SIZE) {
+int VMread(uint64_t virtualAddress, word_t *value)
+{
+    if (virtualAddress >= VIRTUAL_MEMORY_SIZE)
+    {
         return 0;
     }
-    uint64_t p_address = getPhysicalAddress(virtualAddress); // add find adrress function.
-    PMread(p_address, value);
+    uint64_t physicalAddress = getPhysicalAddress(virtualAddress);
+    PMread(physicalAddress, value);
     return 1;
 }
 
-/* writes a word to the given virtual address
- *
- * returns 1 on success.
- * returns 0 on failure (if the address cannot be mapped to a physical
- * address for any reason)
+/**
+ * writes a word to the given virtual address
+ * @param virtualAddress virtual address to write to
+ * @param value word to be written
+ * @return 1 if succeeded, 0 else
  */
-int VMwrite(uint64_t virtualAddress, word_t value) {
-    if (virtualAddress >= VIRTUAL_MEMORY_SIZE) {
+int VMwrite(uint64_t virtualAddress, word_t value)
+{
+    if (virtualAddress >= VIRTUAL_MEMORY_SIZE)
+    {
         return 0;
     }
-    uint64_t p_address = getPhysicalAddress(virtualAddress); // add find adrress function.
-    PMwrite(p_address, value);
+    uint64_t physicalAddress = getPhysicalAddress(virtualAddress);
+    PMwrite(physicalAddress, value);
     return 1;
+}
+
+/**
+ * recursive dfs algorithm to traverse tree in order to find free frame
+ * @param address root address
+ * @param forbiddenToEvict frame that can't be evicted
+ * @param depth current depth
+ * @param physicalAddress parent address
+ * @param pageSwap virtual address
+ * @param currentPage current page
+ * @param info struct to be updated
+ */
+void DFS(word_t address, word_t forbiddenToEvict, int depth,
+         word_t physicalAddress, uint64_t pageSwap, uint64_t currentPage, Info &info)
+{
+    info.maxIndex = address > info.maxIndex ? address : info.maxIndex;
+    if (depth == TABLES_DEPTH)
+    {
+        UpdateSwap(info, currentPage, physicalAddress);
+        return;
+    }
+    word_t child, frame;
+    uint64_t physical;
+    bool isEmpty = true; //all rows of frame is 0
+    for (uint64_t i = 0; i < PAGE_SIZE; ++i)
+    {
+        physical = address * PAGE_SIZE + i;
+        PMread(physical, &child);
+        if (child != 0)
+        {
+            if (currentPage % 2 == 0)
+            {
+                info.weights[depth] = WEIGHT_EVEN;
+            }
+            else
+            {
+                info.weights[depth] = WEIGHT_ODD;
+            }
+            isEmpty = false;
+            DFS(child, forbiddenToEvict, depth + 1, physical, pageSwap,
+                (currentPage << OFFSET_WIDTH) + i, info);
+        }
+
+    }
+    PMread(physicalAddress, &frame);
+    if (isEmpty && frame != forbiddenToEvict)
+    {
+        info.emptyAddress = address;
+        info.emptyPhysical = physicalAddress;
+
+    }
+}
+
+/**
+ * updates info struct with furthest frame data
+ * @param physicalAddress physical address of the frame
+ * @param pageSwap virtual address
+ * @param currentPage current furthest
+ * @param info struct to be updated
+ */
+//void
+//updateFurthestData(word_t physicalAddress, uint64_t pageSwap, uint64_t currentPage, Info &info)
+//{
+//    uint64_t absPageDist = ABS(pageSwap, currentPage);
+//    uint64_t distance = std::min((uint64_t) NUM_PAGES - absPageDist, absPageDist);
+//    if (distance > info.maxDistance)
+//    {
+//        info.maxDistance = distance;
+//        info.furthestPage = currentPage;
+//        PMread(physicalAddress, &info.furthestFrame);
+//        info.furthestPhysical = physicalAddress;
+//    }
+//}
+
+void UpdateSwap(Info &data, uint64_t currentPage, word_t pyAddress) {
+    int newWeight = 0;
+    for (int i = 0; i < TABLES_DEPTH; i++) {
+        newWeight += data.weights[i];
+    }
+    if (newWeight > data.maxweight) {
+        data.maxweight = newWeight;
+        data.furthestPage = currentPage;
+        PMread(pyAddress, &data.furthestFrame);
+        data.furthestPhysical = pyAddress;
+    }
+}
+/**
+ * finds free frame
+ * @param pageNumber virtual address, without offset
+ * @param forbiddenToEvict address that can't be evicted
+ * @return
+ */
+uint64_t findFreeFrame(uint64_t pageNumber, word_t forbiddenToEvict)
+{
+    Info info = {};
+    DFS(0, forbiddenToEvict, 0, 0, pageNumber, 0, info);
+    if (info.emptyAddress != 0)
+    {
+        //case no 1 - empty cell
+        PMwrite(info.emptyPhysical, 0);
+        return info.emptyAddress;
+    }
+    if (info.maxIndex + 1 < NUM_FRAMES)
+    {
+        //case no 2 - unused
+        return info.maxIndex + 1;
+    }
+    //case no 3 - evicting furthest frame
+    PMevict(info.furthestFrame, info.furthestPage);
+    PMwrite(info.furthestPhysical, 0);
+    return info.furthestFrame;
 }
