@@ -50,6 +50,24 @@ void createTags(uint64_t pageNum, uint64_t *tags)
     }
 }
 
+/*
+* Swap with hard drive memory
+*/
+void UpdateSwap(TreeData &data, uint64_t currentPage, word_t physicalAddress)
+{
+    int newWeight = 0;
+    for (int i = 0; i < TABLES_DEPTH; i++)
+    {
+        newWeight += data.weights[i];
+    }
+    if (newWeight > data.maxweight)
+    {
+        data.maxweight = newWeight;
+        data.mostRemotePage = currentPage;
+        PMread(physicalAddress, &data.mostRemoteFrame);
+        data.mostRemotePhysical = physicalAddress;
+    }
+}
 
 /*
  * Dfs algorithm
@@ -182,23 +200,4 @@ int VMwrite(uint64_t virtualAddress, word_t value)
         return 1;
     }
     return 0;
-}
-
-/*
-* Swap with hard drive memory
-*/
-void UpdateSwap(TreeData &data, uint64_t currentPage, word_t physicalAddress)
-{
-    int newWeight = 0;
-    for (int i = 0; i < TABLES_DEPTH; i++)
-    {
-        newWeight += data.weights[i];
-    }
-    if (newWeight > data.maxweight)
-    {
-        data.maxweight = newWeight;
-        data.mostRemotePage = currentPage;
-        PMread(physicalAddress, &data.mostRemoteFrame);
-        data.mostRemotePhysical = physicalAddress;
-    }
 }
