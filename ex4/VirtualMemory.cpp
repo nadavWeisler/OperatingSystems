@@ -41,7 +41,7 @@ void VMinitialize()
 /*
  * Split page number to tags
  */
-void createTags(uint64_t pageNum, uint64_t *tags)
+void splitToTags(uint64_t pageNum, uint64_t *tags)
 {
     for (int i = TABLES_DEPTH - 1; i >= 0; i--)
     {
@@ -69,27 +69,53 @@ void UpdateSwap(TreeData &data, uint64_t currentPage, word_t physicalAddress)
     }
 }
 
+/**
+ * check for braking point in recursive DFS
+ */
+void checkBreakingPoint(int depth, uint64_t currentPage,TreeData &treeData,word_t physicalAddress)
+{
+    if (depth == TABLES_DEPTH)
+    {
+        UpdateSwap(treeData, currentPage, physicalAddress);
+        return;
+    }
+}
+
+/**
+ * sets the address to the bew free address find by DFS, only if not all rows where diffrent from 0
+ * @param rowsNotEmpty
+ * @param frame
+ * @param notEvict
+ * @param treeData
+ * @param address
+ * @param physicalAddress
+ */
+void setFreeAddress(bool rowsNotEmpty,word_t frame, word_t notEvict,TreeData &treeData,word_t address,
+        word_t physicalAddress)
+{
+    if (!rowsNotEmpty && frame != notEvict)
+    {
+        treeData.freePhysicalAddress = physicalAddress;
+        treeData.freeAddress = address;
+    }
+}
+
+
 /*
  * Dfs algorithm
 */
 void DFS(word_t address, word_t physicalAddress, word_t notEvict, uint64_t pageSwap, uint64_t currentPage,
          int depth, TreeData &treeData)
 {
-    if (address > treeData.maxIndex)
+    if (treeData.maxIndex < address)
     {
         treeData.maxIndex = address;
     }
-
-    if (depth == TABLES_DEPTH)
-    {
-        UpdateSwap(treeData, currentPage, physicalAddress);
-        return;
-    }
-
+    checkBreakingPoint(depth, currentPage, treeData, physicalAddress);
     word_t subTree;
     word_t frame;
     uint64_t physical;
-    bool rowsEmpty = true;
+    bool rowsNotEmpty = false;
     for (uint64_t i = 0; i < PAGE_SIZE; ++i)
     {
         physical = address * PAGE_SIZE + i;
@@ -104,17 +130,13 @@ void DFS(word_t address, word_t physicalAddress, word_t notEvict, uint64_t pageS
             {
                 treeData.weights[depth] = WEIGHT_ODD;
             }
-            rowsEmpty = false;
+            rowsNotEmpty = true;
             DFS(subTree, notEvict, depth + 1, physical, pageSwap,
                 (currentPage << OFFSET_WIDTH) + i, treeData);
         }
     }
     PMread(physicalAddress, &frame);
-    if (rowsEmpty && frame != notEvict)
-    {
-        treeData.freeAddress = address;
-        treeData.freePhysicalAddress = physicalAddress;
-    }
+    setFreeAddress(rowsNotEmpty, frame, notEvict, treeData, address, physicalAddress);
 }
 
 /*
@@ -129,9 +151,10 @@ uint64_t getNextFrame(uint64_t pageNum, word_t notEvict)
         PMwrite(data.freePhysicalAddress, 0);
         return data.freeAddress;
     }
-    if (data.maxIndex + 1 < NUM_FRAMES)
+    if (data.maxIndex < NUM_FRAMES -1)
     {
-        return data.maxIndex + 1;
+        data.maxIndex++;
+        return data.maxIndex;
     }
     PMevict(data.mostRemoteFrame, data.mostRemotePage);
     PMwrite(data.mostRemotePhysical, 0);
@@ -143,14 +166,13 @@ uint64_t getNextFrame(uint64_t pageNum, word_t notEvict)
  */
 uint64_t getPhysicalAddress(uint64_t virtualAddress)
 {
-    uint64_t tags[TABLES_DEPTH];
-    uint64_t pageNum = virtualAddress >> OFFSET_WIDTH;
-    createTags(pageNum, tags);
     word_t address = 0;
     word_t notEvict = 0;
     uint64_t frame = 0;
-
-    for (int i = 0; i < TABLES_DEPTH; ++i)
+    uint64_t pageNum = virtualAddress >> OFFSET_WIDTH;
+    uint64_t tags[TABLES_DEPTH];
+    splitToTags(pageNum, tags);
+    for (int i = 0; i < TABLES_DEPTH; i++)
     {
         uint64_t physicalAddress = address * PAGE_SIZE + tags[i];
         PMread(physicalAddress, &address);
@@ -171,7 +193,6 @@ uint64_t getPhysicalAddress(uint64_t virtualAddress)
         notEvict = address;
     }
     return address * PAGE_SIZE + OFFSET(virtualAddress);
-    ;
 }
 
 /*
